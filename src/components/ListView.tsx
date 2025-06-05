@@ -146,7 +146,7 @@ const ListView: React.FC = () => {
                       )
                     );
                   }}
-                  className="w-full p-1 bg-gray-50 rounded"
+                  className="w-full p-1 rounded"
                 />
                 <button
                   onClick={() => deleteTask(group.id, task.id)}
