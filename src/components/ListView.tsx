@@ -3,6 +3,11 @@ import React, { useState } from "react";
 type Task = {
   id: string;
   title: string;
+  requester?: string;
+  assignee?: string;
+  prioritiy?: string;
+  due?: Date;
+  status?: string;
 };
 
 type TaskGroup = {
