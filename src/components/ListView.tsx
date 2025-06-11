@@ -36,7 +36,7 @@ const ListView: React.FC = () => {
   const addGroup = () => {
     const newGroup: TaskGroup = {
       id: Date.now().toString(),
-      name: `Group ${groups.length + 1}`,
+      name: "New Group",
       collapsed: false,
       tasks: [],
     };

@@ -23,7 +23,7 @@ const Header: React.FC<Props> = ({ view, setView }) => {
         </button>
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 bg-gray-700 text-white rounded"
+          className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-white rounded"
         >
           Toggle Theme
         </button>
