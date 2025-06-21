@@ -12,15 +12,14 @@ import type { Task } from "./types";
 const columnHelper = createColumnHelper<Task>();
 
 const INITIAL_DATA: Task[] = [
-  { id: "1", title: "Design homepage", deadline: "2025‑06‑20" },
+  { id: "1", title: "Design homepage", Priority: "Medium" },
   { id: "2", title: "Write blog post", priority: "High" },
-  { id: "3", title: "Fix login bug", priority: "Low", assignee: "Alice" },
+  { id: "3", title: "Fix login bug", priority: "Low" },
 ];
 
-// Props from parent ListView:
 export interface TaskTableProps {
   tasks: Task[];
-  fields: string[]; // Field[] is equivalent here
+  fields: string[];
   updateTask: (taskId: string, field: string, value: string) => void;
   deleteTask: (taskId: string) => void;
 }
@@ -31,7 +30,7 @@ export default function TaskTable({
   updateTask,
   deleteTask,
 }: TaskTableProps) {
-  const [data, setData] = useState<Task[]>(tasks);
+  const [data, setData] = useState<Task[]>(INITIAL_DATA);
   const [columns, setColumns] = useState<ColumnDef<Task, unknown>[]>([
     columnHelper.accessor("title", {
       id: "title",
@@ -92,7 +91,10 @@ export default function TaskTable({
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
               {hg.headers.map((header) => (
-                <th key={header.id} className="border p-2 bg-gray-100">
+                <th
+                  key={header.id}
+                  className="border p-2 bg-gray-100 dark:bg-gray-800"
+                >
                   <div className="flex justify-between items-center">
                     {flexRender(
                       header.column.columnDef.header,
@@ -117,10 +119,18 @@ export default function TaskTable({
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="border p-2">
+                <td key={cell.id} className="border p-2 w-screen">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
+              <td>
+                <button
+                  onClick={() => deleteTask(row.original.id)}
+                  className="text-red-600 hover:underline p-3 text-xl"
+                >
+                  -
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

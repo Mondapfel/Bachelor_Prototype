@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
 type Props = {
   view: "list" | "kanban";
@@ -13,19 +14,23 @@ const Header: React.FC<Props> = ({ view, setView }) => {
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow">
-      <h1 className="text-xl font-bold">My Task Board</h1>
+      <h1 className="text-xl font-bold">Task Board</h1>
       <div className="flex gap-4">
         <button
           onClick={() => setView(view === "list" ? "kanban" : "list")}
-          className="px-3 py-1 bg-blue-500 text-white rounded"
+          className="px-3 py-1 bg-purple-400 text-white rounded"
         >
           Switch to {view === "list" ? "Kanban" : "List"} View
         </button>
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-white rounded"
+          className="px-3 py-1 bg-gray-400 dark:bg-gray-700 text-white rounded"
         >
-          Toggle Theme
+          {document.documentElement.classList.contains("dark") ? (
+            <Sun />
+          ) : (
+            <Moon />
+          )}
         </button>
       </div>
     </div>

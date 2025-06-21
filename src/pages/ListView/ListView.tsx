@@ -1,17 +1,6 @@
-// ListView.tsx
 import React, { useState } from "react";
 import type { Field, Task, TaskGroup } from "./types";
-import FieldSelector from "./FieldSelector";
 import TaskTable from "./TaskTable";
-
-const possibleFields: Field[] = [
-  "Title",
-  "Requester",
-  "Assignee",
-  "Priority",
-  "Due Date",
-  "Status",
-];
 
 export default function ListView() {
   const [fields, setFields] = useState<Field[]>([
@@ -26,7 +15,7 @@ export default function ListView() {
       id: "g1",
       name: "To Do",
       collapsed: false,
-      tasks: [{ id: "t1", title: "Example Task" }],
+      tasks: [],
     },
     { id: "g2", name: "Done", collapsed: false, tasks: [] },
   ]);
@@ -38,15 +27,15 @@ export default function ListView() {
     value: string
   ) => {
     setGroups((prev) =>
-      prev.map((g) =>
-        g.id === groupId
+      prev.map((group) =>
+        group.id === groupId
           ? {
-              ...g,
-              tasks: g.tasks.map((t) =>
+              ...group,
+              tasks: group.tasks.map((t) =>
                 t.id === taskId ? { ...t, [field]: value } : t
               ),
             }
-          : g
+          : group
       )
     );
   };
@@ -119,7 +108,7 @@ export default function ListView() {
               </button>
             </div>
           </div>
-          {!group.collapsed && (
+          {/*!group.collapsed && (
             <TaskTable
               tasks={group.tasks}
               fields={fields}
@@ -128,7 +117,7 @@ export default function ListView() {
               }
               deleteTask={(taskId) => deleteTask(group.id, taskId)}
             />
-          )}
+          )*/}
         </div>
       ))}
     </div>
