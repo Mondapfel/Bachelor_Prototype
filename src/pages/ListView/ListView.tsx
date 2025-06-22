@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { Field, Task, TaskGroup } from "./types";
-import TaskTable from "./TaskTable";
+import TaskArea from "./TaskArea";
 
 export default function ListView() {
   const [fields, setFields] = useState<Field[]>([
@@ -108,7 +108,9 @@ export default function ListView() {
               </button>
             </div>
           </div>
-          {/*!group.collapsed && (
+          {
+            <TaskArea />
+            /*!group.collapsed && (
             <TaskTable
               tasks={group.tasks}
               fields={fields}
@@ -117,7 +119,8 @@ export default function ListView() {
               }
               deleteTask={(taskId) => deleteTask(group.id, taskId)}
             />
-          )*/}
+          )*/
+          }
         </div>
       ))}
     </div>
