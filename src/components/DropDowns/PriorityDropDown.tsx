@@ -27,25 +27,96 @@ import {
   ChevronsLeftRightEllipsis,
   Plus,
 } from "lucide-react";
+import { useCheckedPrioritiesStore } from "@/hooks/useCheckedPrioritiesStore";
+//import { useTasksDataStore } from "@/hooks/useTasksDataStore";
+import { tasks, type Priority } from "@/data/TasksData";
 
-type Status = {
+type SinglePriorityItem = {
   value: string;
   label: string;
   icon: IconType;
+  count: number;
 };
 
-const statuses: Status[] = [
-  { value: "niedrig", label: "Niedrig", icon: ArrowBigDown },
-  { value: "mittel", label: "Mittel", icon: ChevronsLeftRightEllipsis },
-  { value: "hoch", label: "Hoch", icon: ArrowBigUp },
-  { value: "kritisch", label: "Kritisch", icon: ShieldAlert },
+const prioritiesArray: SinglePriorityItem[] = [
+  { value: "niedrig", label: "Niedrig", icon: ArrowBigDown, count: 0 },
+  {
+    value: "mittel",
+    label: "Mittel",
+    icon: ChevronsLeftRightEllipsis,
+    count: 0,
+  },
+  { value: "hoch", label: "Hoch", icon: ArrowBigUp, count: 0 },
+  { value: "kritisch", label: "Kritisch", icon: ShieldAlert, count: 0 },
 ];
 
 export function PriorityDropDown() {
-  const [open, setOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
+  const [open, setOpen] = React.useState(false);
+  const { checkedPriorities, setCheckedPriorities } =
+    useCheckedPrioritiesStore();
 
-  console.log(selectedStatus);
+  //const { tasks } = useTasksDataStore();
+
+  function updateSelection(label: string) {
+    const validPriorities: Priority[] = [
+      "Niedrig",
+      "Mittel",
+      "Hoch",
+      "Kritisch",
+    ];
+
+    if (!validPriorities.includes(label as Priority)) {
+      console.error("Invalid Priority type");
+      return;
+    }
+
+    const priority = label as Priority;
+
+    const newCheckedPriorities = checkedPriorities.includes(priority)
+      ? checkedPriorities.filter((p) => p !== priority)
+      : [...checkedPriorities, priority];
+
+    setCheckedPriorities(newCheckedPriorities);
+  }
+
+  const priorityCounts: SinglePriorityItem[] = React.useMemo(() => {
+    //if the tasks is null, return prioritiesArray
+    if (!tasks) {
+      return prioritiesArray;
+    }
+
+    //count the priorities of low, medium, and high
+    const countByLow = tasks?.filter(
+      (task) => task.priority === "Niedrig"
+    ).length;
+    const countByMedium = tasks?.filter(
+      (task) => task.priority === "Mittel"
+    ).length;
+    const countByHigh = tasks?.filter(
+      (task) => task.priority === "Hoch"
+    ).length;
+    const countByCritical = tasks?.filter(
+      (task) => task.priority === "Kritisch"
+    ).length;
+
+    //update the count property of the statusArray based on the priority
+    //and return it
+    return prioritiesArray.map((priority) => {
+      switch (priority.value) {
+        case "niedrig":
+          return { ...priority, count: countByLow };
+        case "mittel":
+          return { ...priority, count: countByMedium };
+        case "hoch":
+          return { ...priority, count: countByHigh };
+        case "kritisch":
+          return { ...priority, count: countByCritical };
+
+        default:
+          return priority;
+      }
+    });
+  }, [tasks]);
 
   return (
     <div className="flex items-center space-x-4">
@@ -53,6 +124,7 @@ export function PriorityDropDown() {
         <PopoverTrigger asChild>
           <Button
             size="sm"
+            disabled={!tasks}
             variant={"outline"}
             className="h-10 justify-start border-dashed px-5"
           >
@@ -62,15 +134,21 @@ export function PriorityDropDown() {
                 <span>Priorität</span>
               </div>
 
-              <Separator
-                orientation="vertical"
-                className="h-6 border-1 border-gray-300"
-              />
-
-              <div className="flex items-center gap-2">
-                <Badge variant={"secondary"}>Niedrig</Badge>
-                <Badge variant={"secondary"}>Mittel</Badge>
-              </div>
+              {checkedPriorities?.length > 0 && (
+                <>
+                  <Separator
+                    orientation="vertical"
+                    className="h-6 border-l border-gray-300"
+                  />
+                  <div className="flex items-center gap-2">
+                    {checkedPriorities.map((checkPriority, index) => (
+                      <Badge key={index} variant={"secondary"}>
+                        {checkPriority}
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </Button>
         </PopoverTrigger>
@@ -80,25 +158,23 @@ export function PriorityDropDown() {
             <CommandList>
               <CommandEmpty>Keine Ergebnisse</CommandEmpty>
               <CommandGroup>
-                {statuses.map((status) => (
+                {priorityCounts.map((priority) => (
                   <CommandItem
-                    key={status.value}
-                    value={status.value}
+                    key={priority.value}
+                    value={priority.value}
                     className="flex justify-between"
-                    onSelect={(value) => {
-                      setSelectedStatus(
-                        statuses.find((priority) => priority.value === value) ||
-                          null
-                      );
-                    }}
+                    onSelect={() => updateSelection(priority.label)}
                   >
                     <div className="flex items-center gap-3">
-                      <Checkbox />
-
-                      <status.icon />
-                      <span>{status.label}</span>
+                      <Checkbox
+                        checked={checkedPriorities.includes(
+                          priority.label as Priority
+                        )}
+                      />
+                      <priority.icon />
+                      <span>{priority.label}</span>
                     </div>
-                    <span>7</span>
+                    <pre>{priority.count}</pre>
                   </CommandItem>
                 ))}
               </CommandGroup>

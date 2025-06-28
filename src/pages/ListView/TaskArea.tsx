@@ -14,8 +14,12 @@ import { tasksColumns } from "./TasksColumn";
 import { TasksTable } from "./TaskTable";
 import { tasks } from "@/data/TasksData";
 import PaginationArea from "./pagination/PaginationArea";
+import { useCheckedPrioritiesStore } from "@/hooks/useCheckedPrioritiesStore";
+import { useCheckedStatusesStore } from "@/hooks/useCheckedStatusStore";
 
 export default function TaskArea() {
+  const { setCheckedPriorities } = useCheckedPrioritiesStore();
+  const { setCheckedStatuses } = useCheckedStatusesStore();
   return (
     <div className="px-7 mt-5">
       <Card className="dark:bg-blue-950">
@@ -26,8 +30,15 @@ export default function TaskArea() {
               <StatusDropDown />
               <PriorityDropDown />
 
-              <Button variant={"ghost"} className="h-10">
-                <span> Filter zurücksetzen</span>
+              <Button
+                onClick={() => {
+                  setCheckedPriorities([]);
+                  setCheckedStatuses([]);
+                }}
+                variant={"ghost"}
+                className="h-10"
+              >
+                <span>Alle Filter zurücksetzen</span>
                 <X />
               </Button>
             </div>

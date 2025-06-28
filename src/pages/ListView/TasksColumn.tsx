@@ -26,6 +26,7 @@ import {
   Star,
   EyeOff,
 } from "lucide-react";
+import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
 
 function renderStatusIcons(status: Status) {
   switch (status) {
@@ -64,7 +65,7 @@ function formatDate(date: Date): string {
   const month = date.toLocaleString("default", { month: "long" });
   const year = date.getFullYear();
 
-  return `${day}". "${month}${year}`;
+  return `${day}. ${month} ${year}`;
 }
 
 type SortableHeaderProps = {
@@ -149,7 +150,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "title",
-    header: ({ column }) => <SortableHeader column={column} label="Title" />,
+    header: ({ column }) => <SortableHeader column={column} label="Titel" />,
     cell: ({ row }) => {
       const taskLabel = row.original.label;
       const taskTitle = row.original.title;
@@ -160,6 +161,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
         </div>
       );
     },
+    filterFn: "titleFilter",
   },
   {
     accessorKey: "status",
@@ -179,10 +181,13 @@ export const tasksColumns: ColumnDef<Task>[] = [
         </div>
       );
     },
+    filterFn: "statusFilter",
   },
   {
     accessorKey: "priority",
-    header: ({ column }) => <SortableHeader column={column} label="Priority" />,
+    header: ({ column }) => (
+      <SortableHeader column={column} label="Priorität" />
+    ),
     cell: ({ row }) => {
       const PriorityIcon = renderPriorityIcons(row.original.priority);
       const priority = row.original.priority;
@@ -197,6 +202,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
         </div>
       );
     },
+    filterFn: "priorityFilter",
   },
   {
     accessorKey: "createdAt",
@@ -212,5 +218,8 @@ export const tasksColumns: ColumnDef<Task>[] = [
   },
   {
     id: "actions",
+    cell: ({}) => {
+      return <TaskDropDown />;
+    },
   },
 ];

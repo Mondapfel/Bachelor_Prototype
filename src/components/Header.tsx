@@ -14,13 +14,13 @@ const Header: React.FC<Props> = ({ view, setView }) => {
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow">
-      <h1 className="text-xl font-bold">Task Board</h1>
+      <h1 className="text-xl font-bold">Bebsi glaubt an dich!</h1>
       <div className="flex gap-4">
         <button
           onClick={() => setView(view === "list" ? "kanban" : "list")}
-          className="px-3 py-1 bg-purple-400 text-white rounded"
+          className="px-3 py-1 bg-violet-400 text-white rounded"
         >
-          Switch to {view === "list" ? "Kanban" : "List"} View
+          Zu{view === "list" ? " Kanban" : "r Listen"} Ansicht wechseln
         </button>
         <button
           onClick={toggleTheme}

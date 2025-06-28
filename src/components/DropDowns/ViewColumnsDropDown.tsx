@@ -44,7 +44,7 @@ export function DropdownMenuCheckboxes() {
           checked={showPriority}
           onCheckedChange={setShowPriority}
         >
-          Priorität
+          Prioriät
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

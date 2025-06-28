@@ -24,7 +24,7 @@ export default function TaskLabels() {
   const [selectedStatus, setSelectedStatus] = useState<Task["label"]>("Bug");
   return (
     <div className="flex flex-col gap-2">
-      <Label className="opacity-75 text-sm font-medium">Priorität</Label>
+      <Label className="opacity-75 text-sm font-medium">Label</Label>
       <Select
         value={selectedStatus}
         onValueChange={(value: Task["label"]) => {

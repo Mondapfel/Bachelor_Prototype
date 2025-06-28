@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { Field, Task, TaskGroup } from "./types";
 import TaskArea from "./TaskArea";
+import TaskDialog from "@/components/taskDialogue/taskDialog";
 
 export default function ListView() {
   const [fields, setFields] = useState<Field[]>([
@@ -13,11 +14,10 @@ export default function ListView() {
   const [groups, setGroups] = useState<TaskGroup[]>([
     {
       id: "g1",
-      name: "To Do",
+      name: "Aufgaben",
       collapsed: false,
       tasks: [],
     },
-    { id: "g2", name: "Done", collapsed: false, tasks: [] },
   ]);
 
   const updateTask = (
@@ -78,13 +78,13 @@ export default function ListView() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex justify-between">
-        <h1 className="text-2xl font-bold">Task List</h1>
+        <h1 className="text-2xl font-bold">Aufgaben Board</h1>
         <div className=" space-x-2">
           <button
             onClick={addGroup}
-            className="px-3 py-1 bg-purple-400 text-white rounded"
+            className="px-3 py-1 bg-violet-400 text-white rounded"
           >
-            + Group
+            + Gruppe
           </button>
         </div>
       </div>
@@ -94,17 +94,12 @@ export default function ListView() {
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold">{group.name}</span>
             <div className="space-x-2">
-              <button
-                onClick={() => addTask(group.id)}
-                className="px-2 py-1 bg-pink-400 text-white rounded"
-              >
-                + Task
-              </button>
+              <TaskDialog />
               <button
                 onClick={() => deleteGroup(group.id)}
                 className="px-2 py-1 text-red-600 hover:underline"
               >
-                Delete Group
+                Gruppe löschen
               </button>
             </div>
           </div>

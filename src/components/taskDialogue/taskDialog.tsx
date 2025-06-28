@@ -19,9 +19,9 @@ export default function TaskDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Neue Aufgabe anlegen</Button>
+        <Button className="text-white bg-violet-400 dark:bg-blue-950">Neue Aufgabe anlegen</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl bg-violet-200 dark:bg-blue-950">
         <DialogHeader>
           <DialogTitle className="text-xl">Neue Aufgabe</DialogTitle>
           <DialogDescription>

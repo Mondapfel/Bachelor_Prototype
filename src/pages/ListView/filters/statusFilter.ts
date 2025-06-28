@@ -1,0 +1,11 @@
+import type { FilterFn } from "@tanstack/react-table";
+import type { Task } from "@/data/TasksData";
+
+export const statusFilter: FilterFn<Task> = (
+  row,
+  columnId,
+  filterValue: string
+) => {
+  const status: string = row.getValue(columnId);
+  return filterValue.includes(status);
+};
