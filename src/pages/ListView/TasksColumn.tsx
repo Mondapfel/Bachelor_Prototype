@@ -27,6 +27,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
+import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 
 function renderStatusIcons(status: Status) {
   switch (status) {
@@ -103,11 +104,19 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
           <ArrowDown className="mr-2 h-4 w-4" />
           Ab
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <EyeOff className="mr-2 size-7" />
-          Verstecken
-        </DropdownMenuItem>
+        {label !== "Titel" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                column.toggleVisibility();
+              }}
+            >
+              <EyeOff className="mr-2 size-5 opacity-90" />
+              Verstecken
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -184,7 +193,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
     filterFn: "statusFilter",
   },
   {
-    accessorKey: "priority",
+    accessorKey: "priorität",
     header: ({ column }) => (
       <SortableHeader column={column} label="Priorität" />
     ),
@@ -205,7 +214,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
     filterFn: "priorityFilter",
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "erstellt am",
     header: ({ column }) => (
       <SortableHeader column={column} label="Erstellt am" />
     ),
@@ -218,8 +227,19 @@ export const tasksColumns: ColumnDef<Task>[] = [
   },
   {
     id: "actions",
-    cell: ({}) => {
-      return <TaskDropDown />;
+    cell: ({ row }) => {
+      return <ShowTaskDropDown task={row.original} />;
     },
   },
 ];
+
+function ShowTaskDropDown({ task }: { task: Task }) {
+  const { setSelectedTask } = useTasksDataStore();
+
+  return (
+    <TaskDropDown
+      onOpen={() => setSelectedTask(task)}
+      onClose={() => setSelectedTask(null)}
+    />
+  );
+}

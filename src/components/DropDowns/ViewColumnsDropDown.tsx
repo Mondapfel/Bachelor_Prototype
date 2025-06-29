@@ -6,46 +6,44 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Columns3Cog } from "lucide-react";
+import type { Table } from "@tanstack/react-table";
+import type { Task } from "@/data/TasksData";
+import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 
-type Checked = DropdownMenuCheckboxItemProps["checked"];
+export function DropDownViewColumns({ table }: { table: Table<Task> }) {
+  const { tasks } = useTasksDataStore();
 
-export function DropdownMenuCheckboxes() {
-  const [showTitle, setShowTitle] = React.useState<Checked>(true);
-  const [showStatus, setShowStatus] = React.useState<Checked>(false);
-  const [showPriority, setShowPriority] = React.useState<Checked>(false);
+  const columnsToHide = ["priorität", "status", "erstellt am"];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-11 px-8">
-          Spalten
+        <Button disabled={!tasks} variant="outline" className="h-11 px-8">
+          <Columns3Cog />
+          <span>Spalten</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Spalten ein/ausblenden</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuCheckboxItem
-          checked={showTitle}
-          onCheckedChange={setShowTitle}
-        >
-          Titel
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showStatus}
-          onCheckedChange={setShowStatus}
-        >
-          Status
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={showPriority}
-          onCheckedChange={setShowPriority}
-        >
-          Prioriät
-        </DropdownMenuCheckboxItem>
+      <DropdownMenuContent align="end">
+        {table
+          .getAllColumns()
+          .filter(
+            (column) => column.getCanHide() && columnsToHide.includes(column.id)
+          )
+          .map((column) => {
+            return (
+              <DropdownMenuCheckboxItem
+                key={column.id}
+                className="capitalize"
+                checked={column.getIsVisible()}
+                onCheckedChange={(value) => column.toggleVisibility(!!value)}
+              >
+                {column.id}
+              </DropdownMenuCheckboxItem>
+            );
+          })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

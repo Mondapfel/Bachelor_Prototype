@@ -19,22 +19,22 @@ import { Checkbox } from "../ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
-import type { IconType } from "react-icons/lib";
 import {
   ArrowBigDown,
   ArrowBigUp,
   ShieldAlert,
   ChevronsLeftRightEllipsis,
   Plus,
+  type LucideIcon,
 } from "lucide-react";
 import { useCheckedPrioritiesStore } from "@/hooks/useCheckedPrioritiesStore";
-//import { useTasksDataStore } from "@/hooks/useTasksDataStore";
-import { tasks, type Priority } from "@/data/TasksData";
+import { type Priority } from "@/data/TasksData";
+import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 
 type SinglePriorityItem = {
   value: string;
   label: string;
-  icon: IconType;
+  icon: LucideIcon;
   count: number;
 };
 
@@ -55,7 +55,7 @@ export function PriorityDropDown() {
   const { checkedPriorities, setCheckedPriorities } =
     useCheckedPrioritiesStore();
 
-  //const { tasks } = useTasksDataStore();
+  const { tasks } = useTasksDataStore();
 
   function updateSelection(label: string) {
     const validPriorities: Priority[] = [

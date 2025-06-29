@@ -7,13 +7,13 @@ export interface useTasksDataStoreInterface {
   setSelectedTask: (task: Task | null) => void;
   setTasks: (tasks: Task[]) => void;
   fetchTasks: () => Promise<void>;
-  /*
+  
   updateTasks: (
     tasks: Task[],
     operation?: string | undefined
   ) => Promise<{ success: boolean; message: string }>;
   addTask: (task: Task) => Promise<{ success: boolean; message: string }>;
-  */
+  
 }
 
 export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
@@ -128,4 +128,5 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
       return { success: false, message: "Failed to add task!" };
     }
   },
+
 }));

@@ -29,7 +29,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useCheckedStatusesStore } from "@/hooks/useCheckedStatusStore";
-import { tasks, type Status } from "@/data/TasksData";
+import { type Status } from "@/data/TasksData";
+import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 
 type SingleStatusItem = {
   value: string;
@@ -74,6 +75,8 @@ const statusesArray: SingleStatusItem[] = [
 export function StatusDropDown() {
   const [open, setOpen] = React.useState(false);
   const { checkedStatuses, setCheckedStatuses } = useCheckedStatusesStore();
+
+  const { tasks } = useTasksDataStore();
 
   function updateCheckedStatus(label: string) {
     const validStatuses: Status[] = [

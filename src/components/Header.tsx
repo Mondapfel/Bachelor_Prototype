@@ -18,7 +18,7 @@ const Header: React.FC<Props> = ({ view, setView }) => {
       <div className="flex gap-4">
         <button
           onClick={() => setView(view === "list" ? "kanban" : "list")}
-          className="px-3 py-1 bg-violet-400 text-white rounded"
+          className="px-3 py-1 bg-violet-400 dark:bg-blue-950 text-white rounded"
         >
           Zu{view === "list" ? " Kanban" : "r Listen"} Ansicht wechseln
         </button>
