@@ -14,8 +14,9 @@ import {
   ArrowBigUp,
   ShieldAlert,
 } from "lucide-react";
-import { useState } from "react";
 import type { IconType } from "react-icons/lib";
+import { Controller, useFormContext } from "react-hook-form";
+import type { taskFormData } from "../taskDialogSchema";
 
 type Priority = {
   value: Task["priority"];
@@ -30,33 +31,41 @@ const statuses: Priority[] = [
 ];
 
 export default function TaskPriority() {
-  const [selectedStatus, setSelectedStatus] =
-    useState<Task["priority"]>("Niedrig");
+  const { control } = useFormContext<taskFormData>();
   return (
     <div className="flex flex-col gap-2">
       <Label className="opacity-75 text-sm font-medium">Priorität</Label>
-      <Select
-        value={selectedStatus}
-        onValueChange={(value: Task["priority"]) => {
-          setSelectedStatus(value);
+      <Controller
+        name="priority"
+        control={control}
+        defaultValue="Niedrig"
+        render={({ field }) => {
+          return (
+            <Select
+              value={field.value}
+              onValueChange={(value: taskFormData["priority"]) => {
+                field.onChange(value);
+              }}
+            >
+              <SelectTrigger className="w-full h-11">
+                <SelectValue placeholder="Priorität wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {statuses.map((status, index) => (
+                    <SelectItem key={index} value={status.value}>
+                      <div className="flex items-center gap-2">
+                        <status.icon size={15} />
+                        <span>{status.value}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          );
         }}
-      >
-        <SelectTrigger className="w-full h-11">
-          <SelectValue placeholder="Priorität..." />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {statuses.map((status, index) => (
-              <SelectItem key={index} value={status.value}>
-                <div className="flex items-center gap-2">
-                  <status.icon size={15} />
-                  <span>{status.value}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      />
     </div>
   );
 }

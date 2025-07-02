@@ -4,22 +4,22 @@ import type { MenuItemType } from "./types";
 export const MENU_ITEMS: MenuItemType[] = [
   {
     icon: Edit2,
-    label: "Edit",
+    label: "Bearbeiten",
     kind: "edit",
-    shortcut: "⇧⌘E",
+    shortcut: "",
   },
   {
     icon: Copy,
-    label: "Make a Copy",
+    label: "Duplizieren",
     kind: "copy",
-    shortcut: "⌘C",
+    shortcut: "",
   },
   {
     icon: Star,
-    label: "Favorite",
+    label: "Favorisieren",
     kind: "favorite",
-    shortcut: "⌘S",
+    shortcut: "",
   },
 ];
 
-export const LABEL_OPTIONS = ["Dokumentation", "Fehler", "Feature"];
+export const LABEL_OPTIONS = ["Dokumentation", "Bug", "Feature"];

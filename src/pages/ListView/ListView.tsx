@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Field, Task, TaskGroup } from "./types";
+import type { TaskGroup } from "./types";
 import TaskArea from "./TaskArea";
 import TaskDialog from "@/components/taskDialogue/taskDialog";
 

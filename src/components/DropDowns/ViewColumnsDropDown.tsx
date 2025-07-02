@@ -16,7 +16,7 @@ import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 export function DropDownViewColumns({ table }: { table: Table<Task> }) {
   const { tasks } = useTasksDataStore();
 
-  const columnsToHide = ["priorität", "status", "erstellt am"];
+  const columnsToHide = ["priority", "status", "erstellt am"];
 
   return (
     <DropdownMenu>
@@ -40,7 +40,7 @@ export function DropDownViewColumns({ table }: { table: Table<Task> }) {
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.id}
+                {column.id === "priority" ? "Priorität" : column.id}
               </DropdownMenuCheckboxItem>
             );
           })}

@@ -5,14 +5,17 @@ import {
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import type { LucideIcon } from "lucide-react";
 import { handleMenuItemClick } from "./utils";
+import type { Kind } from "./types";
 
 export function MenuItem({
   Icon,
+  kind,
   label,
   shortcut,
   className,
 }: {
   Icon: LucideIcon;
+  kind: Kind;
   label: string;
   shortcut: string;
   className?: string;
@@ -21,7 +24,7 @@ export function MenuItem({
   return (
     <DropdownMenuItem
       onClick={() =>
-        handleMenuItemClick("favorite", tasks, selectedTask, updateTasks)
+        handleMenuItemClick(kind, tasks, selectedTask, updateTasks)
       }
     >
       <Icon className={`mr-2 h-4 w-4 ${className}`} />

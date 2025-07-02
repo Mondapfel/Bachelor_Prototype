@@ -1,15 +1,20 @@
 import type { Task } from "@/data/TasksData";
 import type { useTasksDataStoreInterface } from "@/hooks/useTasksDataStore";
+import { toast, Toaster } from "sonner";
 
 import type { Kind } from "./types";
 
-
+function generateRandomThreeDigitNumber(): string {
+  const randomNumber = Math.floor(Math.random() *900) +100;
+  return randomNumber.toString();
+}
 
 export async function handleMenuItemClick(
   kind: Kind,
   tasks: Task[] | null,
   selectedTask: Task | null,
   updateTasks: useTasksDataStoreInterface["updateTasks"],
+  // add Toast/Sonner
 ) {
   if (!tasks || !selectedTask) return;
 
@@ -42,21 +47,23 @@ export async function handleMenuItemClick(
         
 
       break;
-      /*
+      
     case "copy":
       const copiedTask: Task = {
         ...selectedTask,
         taskId: `task-${generateRandomThreeDigitNumber()}`,
-        title: `${selectedTask.title} (copy)`,
+        title: `${selectedTask.title} (Kopie)`,
         createdAt: new Date(),
       };
       const addCopiedTask = [...tasks, copiedTask];
       const result = await updateTasks(addCopiedTask, "copy");
+      /*
       toast({
         variant: result.success ? "default" : "destructive",
         title: result.success ? "Copy Successful!" : "Copy Failed!",
         description: result.message,
       });
+      */
 
       break;
 
@@ -65,6 +72,7 @@ export async function handleMenuItemClick(
         (task) => task.taskId !== selectedTask.taskId
       );
       const deleteResult = await updateTasks(deleteTasksArray, "delete");
+      /*
       toast({
         variant: deleteResult.success ? "default" : "destructive",
         title: deleteResult.success
@@ -72,9 +80,10 @@ export async function handleMenuItemClick(
           : "Deletion Failed!",
         description: deleteResult.message,
       });
+      */
       
       break;
-      */
+      
 
     default:
       break;

@@ -7,7 +7,6 @@ export interface useTasksDataStoreInterface {
   setSelectedTask: (task: Task | null) => void;
   setTasks: (tasks: Task[]) => void;
   fetchTasks: () => Promise<void>;
-  
   updateTasks: (
     tasks: Task[],
     operation?: string | undefined

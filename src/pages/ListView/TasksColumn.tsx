@@ -193,7 +193,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
     filterFn: "statusFilter",
   },
   {
-    accessorKey: "priorität",
+    accessorKey: "priority",
     header: ({ column }) => (
       <SortableHeader column={column} label="Priorität" />
     ),

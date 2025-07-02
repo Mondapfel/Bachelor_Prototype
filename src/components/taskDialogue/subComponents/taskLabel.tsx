@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/select";
 import type { Task } from "@/data/TasksData";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { useState } from "react";
+import { Controller, useFormContext } from "react-hook-form";
+import type { taskFormData } from "../taskDialogSchema";
 
 type Label = {
   value: Task["label"];
@@ -21,31 +22,40 @@ const statuses: Label[] = [
 ];
 
 export default function TaskLabels() {
-  const [selectedStatus, setSelectedStatus] = useState<Task["label"]>("Bug");
+  const { control } = useFormContext<taskFormData>();
   return (
     <div className="flex flex-col gap-2">
       <Label className="opacity-75 text-sm font-medium">Label</Label>
-      <Select
-        value={selectedStatus}
-        onValueChange={(value: Task["label"]) => {
-          setSelectedStatus(value);
+      <Controller
+        name="label"
+        defaultValue="Bug"
+        control={control}
+        render={({ field }) => {
+          return (
+            <Select
+              value={field.value}
+              onValueChange={(value: taskFormData["label"]) => {
+                field.onChange(value);
+              }}
+            >
+              <SelectTrigger className="w-full h-11">
+                <SelectValue placeholder="Label wählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {statuses.map((status, index) => (
+                    <SelectItem key={index} value={status.value}>
+                      <div className="flex items-center gap-2">
+                        <span>{status.value}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          );
         }}
-      >
-        <SelectTrigger className="w-full h-11">
-          <SelectValue placeholder="Label..." />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {statuses.map((status, index) => (
-              <SelectItem key={index} value={status.value}>
-                <div className="flex items-center gap-2">
-                  <span>{status.value}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      />
     </div>
   );
 }

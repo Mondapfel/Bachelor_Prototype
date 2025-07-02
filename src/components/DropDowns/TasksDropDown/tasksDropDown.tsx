@@ -13,6 +13,7 @@ import { MenuItem } from "./menuItems";
 import { LabelSubMenu } from "./subLabelMenu";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import type { MenuItemType } from "./types";
+import type { Label, Task } from "@/data/TasksData";
 
 export function TaskDropDown({
   onOpen,
@@ -22,10 +23,11 @@ export function TaskDropDown({
   onClose: () => void;
 }) {
   // selected label
-  const [selectedLabel, setSelectedLabel] = useState("Fehler");
+  const [selectedLabel, setSelectedLabel] = useState("Bug");
 
   //selected task
-  const { selectedTask } = useTasksDataStore();
+  const { selectedTask, updateTasks } = useTasksDataStore();
+  const { tasks } = useTasksDataStore();
 
   //menu items array state
   const [menuItemsArray, setMenuItemsArray] =
@@ -37,13 +39,42 @@ export function TaskDropDown({
         if (item.kind === "favorite") {
           return {
             ...item,
-            label: selectedTask?.isFavorite ? "Favorit entfernen" : "Favorisieren",
+            label: selectedTask?.isFavorite
+              ? "Favorit entfernen"
+              : "Favorisieren",
           };
         }
         return item;
       })
     );
   }, [selectedTask]);
+
+  useEffect(() => {
+    if (selectedTask) {
+      setSelectedLabel(selectedTask.label);
+    }
+  }, [selectedTask]);
+
+  const clickedLabelItem = async (newLabel: string) => {
+    const validLabels: Label[] = ["Bug", "Feature", "Dokumentation"];
+    if (!validLabels.includes(newLabel as Label)) {
+      console.error(`The type ${newLabel} is incorrect`);
+      return;
+    }
+
+    if (selectedTask && tasks) {
+      const updatedTask: Task = {
+        ...selectedTask,
+        label: newLabel as Label,
+      };
+
+      const updateTasksArray = tasks.map((task) =>
+        task.taskId === selectedTask.taskId ? updatedTask : task
+      );
+      const result = await updateTasks(updateTasksArray);
+      //Add Toast
+    }
+  };
 
   return (
     <DropdownMenu
@@ -60,6 +91,7 @@ export function TaskDropDown({
           {menuItemsArray.map((item) => (
             <MenuItem
               key={item.label}
+              kind={item.kind}
               Icon={item.icon}
               label={item.label}
               shortcut={item.shortcut}
@@ -69,6 +101,7 @@ export function TaskDropDown({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <LabelSubMenu
+            onClickedLabelItem={clickedLabelItem}
             value={selectedLabel}
             onValueChange={setSelectedLabel}
           />
@@ -76,6 +109,7 @@ export function TaskDropDown({
         <DropdownMenuSeparator />
         <MenuItem
           Icon={Trash2}
+          kind="delete"
           label="Löschen"
           shortcut="Strg + Q"
           className="text-red-500"

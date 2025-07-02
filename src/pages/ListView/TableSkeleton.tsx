@@ -7,7 +7,7 @@ export default function TableSkeleton() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              {["Task", "Title", "Status", "Priority", "Created At"].map(
+              {["Task", "Titel", "Status", "Priorität", "Erstellt am"].map(
                 (_header, idx) => (
                   <th key={idx} className="p-3 text-left">
                     <Skeleton className="h-7 w-3/4" />
