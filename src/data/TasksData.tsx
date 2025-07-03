@@ -141,7 +141,7 @@ export const tasks: Task[] = [
     label: "Feature",
     isFavorite: true,
     priority: "Hoch",
-    status: "In Bearbeitung",
+    status: "Start ausstehend",
     createdAt: new Date("2025-07-20T12:00:00Z"),
   },
   {

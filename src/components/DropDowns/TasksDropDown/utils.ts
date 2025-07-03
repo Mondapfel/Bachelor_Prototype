@@ -1,6 +1,6 @@
 import type { Task } from "@/data/TasksData";
 import type { useTasksDataStoreInterface } from "@/hooks/useTasksDataStore";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 import type { Kind } from "./types";
 
@@ -14,11 +14,15 @@ export async function handleMenuItemClick(
   tasks: Task[] | null,
   selectedTask: Task | null,
   updateTasks: useTasksDataStoreInterface["updateTasks"],
-  // add Toast/Sonner
+  setIsOpen: (isOpen: boolean) => void
 ) {
   if (!tasks || !selectedTask) return;
 
   switch (kind) {
+    case "edit":
+      // open the dialog
+      setIsOpen(true);
+      break;
     case "favorite":
       const taskToUpdate: Task = {
         ...selectedTask,
@@ -30,19 +34,11 @@ export async function handleMenuItemClick(
       const favoriteResult = await updateTasks(updateTasksArray);
       if (!favoriteResult.success) {
         console.log("failed")
-        /*
-        toast({
-          variant: "destructive",
-          title: "Operation Failed!",
-          description: "Something went wrong!",
-        });
+        toast.error("Etwas ist schiefgelaufen!",
+        );
       } else {
-        toast({
-          variant: "default",
-          title: "Task updated!",
-          description: favoriteResult.message,
-        });
-        */
+        toast.info("Aufgabe auktualisiert!");
+        
       }
         
 
@@ -57,13 +53,12 @@ export async function handleMenuItemClick(
       };
       const addCopiedTask = [...tasks, copiedTask];
       const result = await updateTasks(addCopiedTask, "copy");
-      /*
-      toast({
-        variant: result.success ? "default" : "destructive",
-        title: result.success ? "Copy Successful!" : "Copy Failed!",
-        description: result.message,
-      });
-      */
+      toast[result ? "success" : "error"](
+          result
+            ? `[${selectedTask.taskId}] dupliziert!`
+            : `Aufgabe duplizieren fehlgeschlagen`,
+            {description: result.message}
+        );
 
       break;
 
@@ -72,15 +67,12 @@ export async function handleMenuItemClick(
         (task) => task.taskId !== selectedTask.taskId
       );
       const deleteResult = await updateTasks(deleteTasksArray, "delete");
-      /*
-      toast({
-        variant: deleteResult.success ? "default" : "destructive",
-        title: deleteResult.success
-          ? "Deletion Successful!"
-          : "Deletion Failed!",
-        description: deleteResult.message,
-      });
-      */
+      toast[deleteResult ? "success" : "error"](
+          deleteResult
+            ? `[${selectedTask.taskId}] gelöscht!`
+            : `Aufgabe löschen fehlgeschlagen`,
+            {description: deleteResult.message}
+        );
       
       break;
       

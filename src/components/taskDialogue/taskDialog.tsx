@@ -30,9 +30,13 @@ export default function TaskDialog() {
 
   const methods = useForm<taskFormData>({
     resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      title: "",
+    },
   });
 
   const { handleSubmit, reset, setValue } = methods;
+
   const { isOpen, setIsOpen } = useOpenDialogStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -94,7 +98,11 @@ export default function TaskDialog() {
 
       if (updateTasksArray) {
         const result = await updateTasks(updateTasksArray, "copy");
-        // Add toast
+        toast[result ? "success" : "error"](
+          result
+            ? `Die Aufgabe [${selectedTask.taskId}] wurde erfolgreich aktualisiert!`
+            : `Aufgabe aktualisieren fehlgeschlagen`
+        );
       }
 
       setIsLoading(false);
@@ -124,7 +132,7 @@ export default function TaskDialog() {
             {selectedTask ? "Aufgabe bearbeiten" : "Aufgabe hinzufügen"}
           </DialogTitle>
           <DialogDescription>
-            Füllen Sie alle Felder aus, um eine neue Aufgabe hinzuzufügen.
+            Füllen Sie alle Felder aus, um die Aufgabe hinzuzufügen.
           </DialogDescription>
           <div className="mt-4">
             <Separator className="mt-3" />

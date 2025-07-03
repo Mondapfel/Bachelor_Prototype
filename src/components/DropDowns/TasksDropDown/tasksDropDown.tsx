@@ -14,6 +14,8 @@ import { LabelSubMenu } from "./subLabelMenu";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import type { MenuItemType } from "./types";
 import type { Label, Task } from "@/data/TasksData";
+import { toast } from "sonner";
+import { _success } from "zod/v4/core";
 
 export function TaskDropDown({
   onOpen,
@@ -58,7 +60,7 @@ export function TaskDropDown({
   const clickedLabelItem = async (newLabel: string) => {
     const validLabels: Label[] = ["Bug", "Feature", "Dokumentation"];
     if (!validLabels.includes(newLabel as Label)) {
-      console.error(`The type ${newLabel} is incorrect`);
+      console.error(`Der Typ ${newLabel} ist nicht zulässig`);
       return;
     }
 
@@ -71,8 +73,17 @@ export function TaskDropDown({
       const updateTasksArray = tasks.map((task) =>
         task.taskId === selectedTask.taskId ? updatedTask : task
       );
-      const result = await updateTasks(updateTasksArray);
-      //Add Toast
+
+      try {
+        const result = await updateTasks(updateTasksArray);
+        toast[result ? "success" : "error"](
+          result
+            ? `[${selectedTask.taskId}] wurde erfolgreich aktualisiert!`
+            : `Aufgabe aktualisieren fehlgeschlagen`
+        );
+      } catch (error) {
+        console.error("Failed to update tasks:", error);
+      }
     }
   };
 
@@ -111,7 +122,7 @@ export function TaskDropDown({
           Icon={Trash2}
           kind="delete"
           label="Löschen"
-          shortcut="Strg + Q"
+          shortcut=""
           className="text-red-500"
         />
       </DropdownMenuContent>

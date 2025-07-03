@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
+import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
 
 function renderStatusIcons(status: Status) {
   switch (status) {
@@ -235,11 +236,17 @@ export const tasksColumns: ColumnDef<Task>[] = [
 
 function ShowTaskDropDown({ task }: { task: Task }) {
   const { setSelectedTask } = useTasksDataStore();
+  const { isOpen } = useOpenDialogStore();
 
   return (
     <TaskDropDown
       onOpen={() => setSelectedTask(task)}
-      onClose={() => setSelectedTask(null)}
+      //only if the dialog is open, don't set the selected task as null, when the drop down is closed
+      onClose={() => {
+        if (!isOpen) {
+          setSelectedTask(null);
+        }
+      }}
     />
   );
 }

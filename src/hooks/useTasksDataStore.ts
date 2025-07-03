@@ -12,7 +12,6 @@ export interface useTasksDataStoreInterface {
     operation?: string | undefined
   ) => Promise<{ success: boolean; message: string }>;
   addTask: (task: Task) => Promise<{ success: boolean; message: string }>;
-  
 }
 
 export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
@@ -55,16 +54,16 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
     // Determine the success message based on the operation type
     switch (operation) {
       case "copy":
-        successMessage = "Task has been copied successfully!";
+        successMessage = "Die Aufgabe wurde erfolgreich dupliziert.";
         break;
       case "delete":
-        successMessage = "Task has been deleted successfully!";
+        successMessage = "Die Aufgabe wurde erfolgreich gelöscht.";
         break;
       case "favorite":
-        successMessage = "Task is set as favorite successfully!";
+        successMessage = "Die Aufgabe wurde erfolgreich favorisiert.";
         break;
       default:
-        successMessage = "Operation completed successfully!";
+        successMessage = "Operation erfolgreich.";
         break;
     }
 
@@ -91,7 +90,7 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
       console.log(error);
 
       // If an error occurs, return a failure status and a generic error message
-      return { success: false, message: "Something went wrong!" };
+      return { success: false, message: "Etwas ist schiefgelaufen!" };
     }
   },
 
@@ -113,7 +112,7 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
             // Resolve the Promise with a success status and message
             resolve({
               success: true,
-              message: "Task added successfully!",
+              message: "Aufgabe erfolgreich hinzugefügt!",
             });
           }, 1000); // Simulate a delay of 1000 milliseconds
         }
@@ -124,8 +123,7 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
       console.log(error);
 
       // If an error occurs, return a failure status and a generic error message
-      return { success: false, message: "Failed to add task!" };
+      return { success: false, message: "Aufgabe hinzufügen fehlgeschlagen!" };
     }
   },
-
 }));
