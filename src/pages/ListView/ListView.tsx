@@ -23,7 +23,7 @@ export default function ListView() {
       {groups.map((group) => (
         <div
           key={group.id}
-          className="p-4  shadow space-y-2 rounded-2xl"
+          className="p-4 inset-shadow-sm shadow-sm space-y-2 rounded-2xl"
         >
           <div className="flex justify-between items-center">
             <span className="text-lg font-semibold">{group.name}</span>
@@ -31,7 +31,7 @@ export default function ListView() {
               <TaskDialog />
             </div>
           </div>
-          {<TaskArea />}
+          <TaskArea />
         </div>
       ))}
     </div>

@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TableSkeleton() {
   return (
-    <div className="">
+    <div>
       <div className="border rounded-lg">
         <table className="w-full border-collapse">
           <thead>

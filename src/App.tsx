@@ -14,7 +14,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-purple-100 dark:bg-blue-900 text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-blue-100 dark:bg-blue-950 text-gray-900 dark:text-white">
       <Header view={view} setView={setView} />
       {view === "list" ? <ListView /> : <KanbanView />}
     </div>

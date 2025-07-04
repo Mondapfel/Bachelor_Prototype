@@ -13,18 +13,18 @@ const Header: React.FC<Props> = ({ view, setView }) => {
   };
 
   return (
-    <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow">
-      <h1 className="text-xl font-bold">Bebsi glaubt an dich!</h1>
+    <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-slate-950 shadow">
+      <h1 className="text-xl font-bold">Tasky</h1>
       <div className="flex gap-4">
         <button
           onClick={() => setView(view === "list" ? "kanban" : "list")}
-          className="px-3 py-1 bg-violet-400 dark:bg-blue-950 text-white rounded"
+          className="px-3 py-1 bg-blue-400 dark:bg-blue-800 text-white rounded hover:bg-gray-800 dark:hover:bg-gray-400"
         >
           Zu{view === "list" ? " Kanban" : "r Listen"} Ansicht wechseln
         </button>
         <button
           onClick={toggleTheme}
-          className="px-3 py-1 bg-gray-400 dark:bg-gray-700 text-white rounded"
+          className="px-3 py-1 bg-gray-400 dark:bg-gray-700 text-white rounded dark:hover:bg-gray-400 hover:bg-gray-800"
         >
           {document.documentElement.classList.contains("dark") ? (
             <Sun />

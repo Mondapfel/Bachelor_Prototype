@@ -1,7 +1,8 @@
+import { Card } from "@/components/ui/card";
 import React from "react";
 
 const KanbanView = () => {
-  return <div>Hello World!</div>;
+  return <Card></Card>;
 };
 
 export default KanbanView;

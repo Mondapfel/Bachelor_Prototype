@@ -22,14 +22,18 @@ import {
   type ColumnFiltersState,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { titleFilter } from "./filters/titleFilter";
 import { priorityFilter } from "./filters/priorityFilter";
 import { statusFilter } from "./filters/statusFilter";
 import { useEffect, useState } from "react";
+import { TasksSelected } from "./TasksSelected";
 
-export default function TaskArea() {
+export default function TasksArea() {
   const { setCheckedPriorities, checkedPriorities } =
     useCheckedPrioritiesStore();
   const { setCheckedStatuses, checkedStatuses } = useCheckedStatusesStore();
@@ -38,16 +42,31 @@ export default function TaskArea() {
   const { query } = useQueryStore();
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
     data: tasks || [],
     columns: tasksColumns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
     state: {
       columnFilters,
+      rowSelection,
+      pagination,
+      sorting,
     },
-    filterFns: { titleFilter, priorityFilter, statusFilter },
+    filterFns: { titleFilter, priorityFilter, statusFilter }, // Include the filterFns property here
   });
 
   useEffect(() => {
@@ -64,17 +83,27 @@ export default function TaskArea() {
     if (checkedStatuses.length > 0) {
       newFilters.push({ id: "status", value: checkedStatuses });
     }
+
+    console.log(newFilters);
+
     setColumnFilters(newFilters);
   }, [query, checkedPriorities, checkedStatuses]);
 
+  const selectedTasks = Object.keys(rowSelection)
+    .map(Number)
+    .map((index) => tasks?.[index]);
+
   return (
-    <div className="px-7 mt-5">
-      <Card className="dark:bg-blue-950">
+    <div className=" px-7 mt-5">
+      <Card className="dark:bg-slate-900">
+        {/* card header */}
         <CardHeader>
-          <div className=" flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <SearchInput />
+              {/* status drop down */}
               <StatusDropDown />
+              {/* priority drop down */}
               <PriorityDropDown />
 
               {(checkedPriorities.length !== 0 ||
@@ -88,15 +117,22 @@ export default function TaskArea() {
                     variant={"ghost"}
                     className="h-10"
                   >
-                    <span>Alle Filter zurücksetzen</span>
+                    <span>Zurücksetzen</span>
                     <X />
                   </Button>
                 </>
               )}
             </div>
+
+            {/* DropDownViewColumns */}
             <DropDownViewColumns table={table} />
           </div>
         </CardHeader>
+        <TasksSelected
+          rowSelection={rowSelection}
+          setRowSelection={setRowSelection}
+          selectedTasks={selectedTasks}
+        />
         <CardContent>
           {!tasks ? (
             <TableSkeleton />
@@ -105,7 +141,11 @@ export default function TaskArea() {
           )}
         </CardContent>
         <CardFooter>
-          <PaginationArea />
+          <PaginationArea
+            pagination={pagination}
+            setPagination={setPagination}
+            table={table}
+          />
         </CardFooter>
       </Card>
     </div>
