@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import ListView from "./pages/ListView/ListView";
-import KanbanView from "./pages/KanbanView";
+import KanbanView from "./pages/KanbanView/KanbanView";
 import { useTasksDataStore } from "./hooks/useTasksDataStore";
 
 function App() {

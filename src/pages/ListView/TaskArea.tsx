@@ -66,7 +66,7 @@ export default function TasksArea() {
       pagination,
       sorting,
     },
-    filterFns: { titleFilter, priorityFilter, statusFilter }, // Include the filterFns property here
+    filterFns: { titleFilter, priorityFilter, statusFilter }, 
   });
 
   useEffect(() => {

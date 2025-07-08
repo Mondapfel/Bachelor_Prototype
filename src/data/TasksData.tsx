@@ -24,7 +24,7 @@ export const tasks: Task[] = [
     label: "Bug",
     isFavorite: true,
     priority: "Hoch",
-    status: "In Bearbeitung",
+    status: "Blockiert",
     createdAt: new Date("2025-01-21T10:00:00Z"),
   },
   {
@@ -33,7 +33,7 @@ export const tasks: Task[] = [
     label: "Feature",
     isFavorite: false,
     priority: "Mittel",
-    status: "Zu Erledigen",
+    status: "Start ausstehend",
     createdAt: new Date("2025-01-02T12:00:00Z"),
   },
   {
