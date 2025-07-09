@@ -27,39 +27,40 @@ const Column: React.FC<ColumnProps> = ({ id, status, tasks }) => {
   const shouldShowPlaceholder = activeTask && activeTask.status !== id;
 
   return (
-    <div
-      ref={setNodeRef}
-      className="flex flex-col p-2 rounded-lg bg-gray-100 dark:bg-slate-900/80 min-h-[200px]"
-    >
+    <div className="flex flex-col">
       <h3 className="text-lg font-bold mb-2 shrink-0">{status}</h3>
+      <div
+        ref={setNodeRef}
+        className="flex flex-col flex-grow p-2 rounded-lg bg-gray-100 dark:bg-slate-900/80 min-h-[200px]"
+      >
+        <div className="flex flex-col flex-grow">
+          <SortableContext
+            items={tasks.map((t) => t.taskId)}
+            strategy={verticalListSortingStrategy}
+          >
+            {tasks.map((task) => {
+              const isOverThisTask = over?.id === task.taskId;
+              return (
+                <div key={task.taskId}>
+                  {isOverThisTask && shouldShowPlaceholder && activeTask && (
+                    <TaskPlaceholder task={activeTask} />
+                  )}
+                  <SortableTask task={task} />
+                </div>
+              );
+            })}
+          </SortableContext>
 
-      <div className="flex flex-col flex-grow">
-        <SortableContext
-          items={tasks.map((t) => t.taskId)}
-          strategy={verticalListSortingStrategy}
-        >
-          {tasks.map((task) => {
-            const isOverThisTask = over?.id === task.taskId;
-            return (
-              <div key={task.taskId}>
-                {isOverThisTask && shouldShowPlaceholder && activeTask && (
-                  <TaskPlaceholder task={activeTask} />
-                )}
-                <SortableTask task={task} />
+          {isOverColumn &&
+            !isOverTaskInThisColumn &&
+            shouldShowPlaceholder &&
+            activeTask && (
+              <div className="flex-grow">
+                {" "}
+                <TaskPlaceholder task={activeTask} />
               </div>
-            );
-          })}
-        </SortableContext>
-
-        {isOverColumn &&
-          !isOverTaskInThisColumn &&
-          shouldShowPlaceholder &&
-          activeTask && (
-            <div className="flex-grow">
-              {" "}
-              <TaskPlaceholder task={activeTask} />
-            </div>
-          )}
+            )}
+        </div>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
           <Badge variant="secondary">{task.label}</Badge>
         </div>
       )}
-      <div className="flex items-center mt-4">
+      <div className="flex items-center">
         {task.priority && PriorityIcon && (
           <>
             <PriorityIcon className={priorityColor} size={20} />

@@ -81,7 +81,7 @@ const KanbanView = () => {
 
     if (active.id === over.id) return;
 
-    // Scenario 1: Reordering tasks within the same column
+    // Reordering tasks within the same column
     if (overIsTask && activeTask.status === over.data.current?.task.status) {
       const oldIndex = tasks.findIndex((t) => t.taskId === active.id);
       const newIndex = tasks.findIndex((t) => t.taskId === over.id);
@@ -91,7 +91,7 @@ const KanbanView = () => {
       return;
     }
 
-    // Scenario 2: Moving a task to a different column
+    // Moving a task to a different column
     let newStatus: Status | undefined;
     if (overIsColumn) newStatus = over.id as Status;
     if (overIsTask) newStatus = over.data.current?.task.status;
@@ -108,7 +108,6 @@ const KanbanView = () => {
   return (
     <DndContext
       sensors={sensors}
-      // THE FIX: Change the collision detection strategy
       collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
