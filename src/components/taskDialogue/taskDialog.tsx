@@ -34,9 +34,6 @@ export default function TaskDialog() {
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
-      status: "Start ausstehend",
-      priority: "Niedrig",
-      label: "Bug",
     },
   });
 
