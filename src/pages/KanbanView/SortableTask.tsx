@@ -1,13 +1,34 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Task } from "@/data/TasksData";
+import type { Priority, Task } from "@/data/TasksData";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Flag } from "lucide-react";
+import {
+  Star,
+  ArrowBigDown,
+  ArrowBigUp,
+  ShieldAlert,
+  ChevronsLeftRightEllipsis,
+} from "lucide-react";
 
 interface SortableTaskProps {
   task: Task;
 }
+
+const renderPriorityIcons = (priority: Priority) => {
+  switch (priority) {
+    case "Niedrig":
+      return ArrowBigDown;
+    case "Mittel":
+      return ChevronsLeftRightEllipsis;
+    case "Hoch":
+      return ArrowBigUp;
+    case "Kritisch":
+      return ShieldAlert;
+    default:
+      return null;
+  }
+};
 
 const SortableTask = ({ task }: SortableTaskProps) => {
   const {
@@ -34,7 +55,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const getPriorityClass = (priority: string | undefined) => {
     switch (priority) {
       case "Kritisch":
-        return "text-violet-500";
+        return "text-purple-500";
       case "Hoch":
         return "text-red-500";
       case "Mittel":
@@ -46,13 +67,18 @@ const SortableTask = ({ task }: SortableTaskProps) => {
     }
   };
 
+  const PriorityIcon = task.priority
+    ? renderPriorityIcons(task.priority)
+    : null;
+  const priorityColor = getPriorityClass(task.priority);
+
   return (
     <Card
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 mb-2 touch-none dark:bg-slate-800"
+      className="p-4 mb-2 touch-none"
     >
       <div className="flex justify-between items-start">
         <span className="font-bold">{task.title}</span>
@@ -64,12 +90,10 @@ const SortableTask = ({ task }: SortableTaskProps) => {
         </div>
       )}
       <div className="flex items-center mt-4">
-        {task.priority && (
+        {task.priority && PriorityIcon && (
           <>
-            <Flag className={getPriorityClass(task.priority)} size={20} />
-            <span className={`ml-2 ${getPriorityClass(task.priority)}`}>
-              {task.priority}
-            </span>
+            <PriorityIcon className={priorityColor} size={20} />
+            <span className={`ml-2 ${priorityColor}`}>{task.priority}</span>
           </>
         )}
       </div>

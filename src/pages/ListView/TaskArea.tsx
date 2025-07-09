@@ -95,7 +95,7 @@ export default function TasksArea() {
 
   return (
     <div className=" px-7 mt-5">
-      <Card className="dark:bg-slate-900">
+      <Card className="dark:bg-slate-900/80">
         {/* card header */}
         <CardHeader>
           <div className="flex items-center justify-between">

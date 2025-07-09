@@ -30,6 +30,30 @@ import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
 
+const getPriorityClass = (priority: string | undefined) => {
+  switch (priority) {
+    case "Kritisch":
+      return "text-purple-500";
+    case "Hoch":
+      return "text-red-500";
+    case "Mittel":
+      return "text-yellow-500";
+    case "Niedrig":
+      return "text-green-500";
+    default:
+      return "text-gray-400";
+  }
+};
+
+const getLabelStyling = (label: string | undefined): string => {
+  if (!label) return "";
+  const blueLabels = ["Bug", "Feature", "Dokumentation"];
+  if (blueLabels.includes(label)) {
+    return "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-800/50 dark:border-blue-900 dark:text-blue-300 border border-dashed";
+  }
+  return "";
+};
+
 function renderStatusIcons(status: Status) {
   switch (status) {
     case "Start ausstehend":
@@ -155,7 +179,9 @@ export const tasksColumns: ColumnDef<Task>[] = [
     header: "",
     cell: ({ row }) => {
       const FavoriteIcon = row.original.isFavorite && Star;
-      return FavoriteIcon && <FavoriteIcon size={14} />;
+      return (
+        FavoriteIcon && <FavoriteIcon size={14} className="text-yellow-400" />
+      );
     },
   },
   {
@@ -164,9 +190,18 @@ export const tasksColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const taskLabel = row.original.label;
       const taskTitle = row.original.title;
+      const customLabelStyle = getLabelStyling(taskLabel);
+
       return (
         <div className="flex items-center gap-2">
-          <Badge variant={"outline"}>{taskLabel}</Badge>
+          {taskLabel && (
+            <Badge
+              variant={customLabelStyle ? "outline" : "secondary"}
+              className={customLabelStyle}
+            >
+              {taskLabel}
+            </Badge>
+          )}
           <span>{taskTitle}</span>
         </div>
       );
@@ -199,16 +234,14 @@ export const tasksColumns: ColumnDef<Task>[] = [
       <SortableHeader column={column} label="Priorität" />
     ),
     cell: ({ row }) => {
-      const PriorityIcon = renderPriorityIcons(row.original.priority);
       const priority = row.original.priority;
+      const PriorityIcon = renderPriorityIcons(priority);
+      const priorityColor = getPriorityClass(priority);
+
       return (
-        <div>
-          {PriorityIcon && (
-            <div className="flex items-center gap-2 text-sm">
-              <PriorityIcon className="text-gray-600 backdrop-opacity-95" />
-              {priority}
-            </div>
-          )}
+        <div className="flex items-center gap-2 text-sm">
+          {PriorityIcon && <PriorityIcon className={priorityColor} />}
+          <span className={priorityColor}>{priority}</span>
         </div>
       );
     },
@@ -241,7 +274,6 @@ function ShowTaskDropDown({ task }: { task: Task }) {
   return (
     <TaskDropDown
       onOpen={() => setSelectedTask(task)}
-      //only if the dialog is open, don't set the selected task as null, when the drop down is closed
       onClose={() => {
         if (!isOpen) {
           setSelectedTask(null);
