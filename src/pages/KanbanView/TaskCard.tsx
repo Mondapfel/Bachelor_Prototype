@@ -1,7 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/data/TasksData";
-import { Star, Flag } from "lucide-react"; // Using lucide-react for icons, make sure to install it
+import { Star, Flag } from "lucide-react";
 
 interface TaskCardProps {
   task: Task;
@@ -19,7 +19,7 @@ const TaskCard = ({ task }: TaskCardProps) => {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    opacity: isDragging ? 0.5 : 1, // Make the card semi-transparent while dragging
+    opacity: isDragging ? 0.5 : 1,
   };
 
   const getPriorityClass = (priority: string | undefined) => {

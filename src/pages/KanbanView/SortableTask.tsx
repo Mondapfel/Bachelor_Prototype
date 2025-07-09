@@ -1,5 +1,3 @@
-// src/pages/KanbanView/SortableTask.tsx
-
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/data/TasksData";
@@ -30,7 +28,6 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
-    // Hide the original card completely while dragging
     opacity: isDragging ? 0 : 1,
   };
 

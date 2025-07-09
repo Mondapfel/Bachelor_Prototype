@@ -1,5 +1,3 @@
-// src/pages/KanbanView/TaskPlaceholder.tsx
-
 import type { Task } from "@/data/TasksData";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,10 +10,14 @@ interface TaskPlaceholderProps {
 const TaskPlaceholder = ({ task }: TaskPlaceholderProps) => {
   const getPriorityClass = (priority: string | undefined) => {
     switch (priority) {
-      case "Hoch": return "text-red-500";
-      case "Mittel": return "text-yellow-500";
-      case "Niedrig": return "text-green-500";
-      default: return "text-gray-400";
+      case "Hoch":
+        return "text-red-500";
+      case "Mittel":
+        return "text-yellow-500";
+      case "Niedrig":
+        return "text-green-500";
+      default:
+        return "text-gray-400";
     }
   };
 

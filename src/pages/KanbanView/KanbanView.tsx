@@ -1,8 +1,5 @@
-// src/pages/KanbanView/KanbanView.tsx
-
 import {
   DndContext,
-  // REMOVE closestCorners and import pointerWithin
   pointerWithin,
   type DragEndEvent,
   type DragStartEvent,
