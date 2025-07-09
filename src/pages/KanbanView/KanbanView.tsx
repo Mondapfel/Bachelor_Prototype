@@ -1,45 +1,29 @@
 import {
-  closestCorners,
   DndContext,
+  closestCorners,
   type DragEndEvent,
   type DragOverEvent,
-  type DragAbortEvent,
-  KeyboardSensor,
+  type DragStartEvent,
   PointerSensor,
-  type UniqueIdentifier,
   useSensor,
   useSensors,
-  type DragStartEvent,
-  useDroppable,
+  DragOverlay,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
-import Column from "@/pages/KanbanView/Column";
 import type { Task, Status } from "@/data/TasksData";
-import { useState, type DragEvent } from "react";
-
-function DroppableColumn({
-  id,
-  status,
-  tasks,
-}: {
-  id: string;
-  status: Status;
-  tasks: Task[];
-}) {
-  const { setNodeRef } = useDroppable({
-    id,
-  });
-
-  return (
-    <div ref={setNodeRef}>
-      <Column id={id} status={status} tasks={tasks} />
-    </div>
-  );
-}
-
+import { useState, useEffect, useMemo } from "react";
+import Column from "./Column";
+import SortableTask from "./SortableTask";
 
 const KanbanView = () => {
-  const { tasks } = useTasksDataStore();
+  const { tasks: initialTasks, updateTasks } = useTasksDataStore();
+  const [tasks, setTasks] = useState<Task[]>(initialTasks ?? []);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    setTasks(initialTasks ?? []);
+  }, [initialTasks]);
 
   const statusOrder: Status[] = [
     "Start ausstehend",
@@ -49,68 +33,111 @@ const KanbanView = () => {
     "Erledigt",
   ];
 
-  const groupedTasks: Record<Status, Task[]> = {
-    "Start ausstehend": [],
-    "Zu Erledigen": [],
-    "In Bearbeitung": [],
-    Blockiert: [],
-    Erledigt: [],
-  };
+  const groupedTasks = useMemo(() => {
+    const grouped: Record<Status, Task[]> = {
+      "Start ausstehend": [],
+      "Zu Erledigen": [],
+      "In Bearbeitung": [],
+      Blockiert: [],
+      Erledigt: [],
+    };
+    (tasks ?? []).forEach((task) => {
+      if (grouped[task.status]) {
+        grouped[task.status].push(task);
+      }
+    });
+    return grouped;
+  }, [tasks]);
 
-  (tasks ?? []).forEach((task) => {
-    groupedTasks[task.status].push(task);
-  });
-
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  void activeId;
-  
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    }),
-    useSensor(KeyboardSensor),
+    })
   );
 
-  function findColumnId(
-  taskId: UniqueIdentifier,
-  groupedTasks: Record<Status, Task[]>
-): Status | undefined {
-  return Object.entries(groupedTasks).find(([status, tasks]) =>
-    tasks.some((task) => task.taskId === taskId)
-  )?.[0] as Status | undefined;
-}
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const task = tasks.find((t) => t.taskId === active.id);
+    if (task) {
+      setActiveTask(task);
+    }
+  };
 
-  function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id);
-  }
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTask(null);
+    const { active, over } = event;
 
-  function handleDragOver(event: DragOverEvent) {
-    console.log("Drag over", event);
-  }
+    if (!over) return;
 
-  function handleDragEnd(event: DragEndEvent) {
-    setActiveId(null);
-    console.log("Drag end", event);
-  }
+    const activeId = active.id;
+    const overId = over.id;
 
-  return (  
-    <div className=" items-center gap-2">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="grid grid-cols-5 gap-5 p-5">
-          {statusOrder.map((status) => (
-            <DroppableColumn key={status} id={status} status={status} tasks={groupedTasks[status]} />
-          ))}
-        </div>
-      </DndContext>
-    </div>
+    const activeTask = tasks.find((t) => t.taskId === activeId);
+    if (!activeTask) return;
+
+    // Determine the new status based on what the task was dropped on
+    let newStatus: Status | undefined;
+    if (over.data.current?.type === "Column") {
+      newStatus = overId as Status;
+    } else {
+      const overTask = tasks.find((t) => t.taskId === overId);
+      if (overTask) {
+        newStatus = overTask.status;
+      }
+    }
+
+    if (!newStatus) return;
+
+    // Determine if we are reordering or changing status
+    const isChangingColumn = activeTask.status !== newStatus;
+    const isReorderingInSameColumn =
+      over.data.current?.type === "Task" && !isChangingColumn;
+
+    let newTasks = tasks;
+
+    // Handle both status change and reordering
+    if (isChangingColumn) {
+      newTasks = newTasks.map((t) =>
+        t.taskId === activeId ? { ...t, status: newStatus } : t
+      );
+    }
+
+    if (isReorderingInSameColumn && active.id !== over.id) {
+      const oldIndex = newTasks.findIndex((t) => t.taskId === activeId);
+      const newIndex = newTasks.findIndex((t) => t.taskId === overId);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        newTasks = arrayMove(newTasks, oldIndex, newIndex);
+      }
+    }
+
+    // Apply the final state and persist it
+    setTasks(newTasks);
+    updateTasks(newTasks, "update");
+  };
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="grid grid-cols-5 gap-5 p-5">
+        {statusOrder.map((status) => (
+          <Column
+            key={status}
+            id={status}
+            status={status}
+            tasks={groupedTasks[status] ?? []}
+          />
+        ))}
+      </div>
+      <DragOverlay>
+        {activeTask ? <SortableTask task={activeTask} /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 

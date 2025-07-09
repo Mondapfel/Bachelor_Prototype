@@ -1,14 +1,15 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Task } from '@/data/TasksData';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Task } from "@/data/TasksData";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, Flag } from "lucide-react";
 
-const SortableTask: React.FC<{ task: Task }> = ({ task }) => {
-  // Defensive check to prevent crash if task is undefined
-  if (!task) {
-    return null;
-  }
+interface SortableTaskProps {
+  task: Task;
+}
 
+const SortableTask = ({ task }: SortableTaskProps) => {
   const {
     attributes,
     listeners,
@@ -16,31 +17,60 @@ const SortableTask: React.FC<{ task: Task }> = ({ task }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.taskId, data: {type: 'Task', task} });
+  } = useSortable({
+    id: task.taskId,
+    data: {
+      type: "Task",
+      task,
+    },
+  });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    cursor: 'grab',
+    transform: CSS.Transform.toString(transform),
+  };
+
+  const getPriorityClass = (priority: string | undefined) => {
+    switch (priority) {
+      case "Hoch":
+        return "text-red-500";
+      case "Mittel":
+        return "text-yellow-500";
+      case "Niedrig":
+        return "text-green-500";
+      default:
+        return "text-gray-400";
+    }
   };
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="rounded-lg p-3 shadow-sm mb-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+      className={`p-4 mb-2 touch-none ${isDragging ? "opacity-50" : ""}`}
     >
-      <div className="flex justify-between items-center">
-        <span className="font-semibold text-sm text-gray-800 dark:text-gray-100">{task.title}</span>
-        {task.isFavorite && <span title="Favorit">⭐</span>}
+      <div className="flex justify-between items-start">
+        <span className="font-bold">{task.title}</span>
+        {task.isFavorite && <Star className="text-yellow-400" size={20} />}
       </div>
-      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-        <span>{task.label}</span> • <span>{task.priority}</span>
+      {task.label && (
+        <div className="mt-2">
+          <Badge variant="secondary">{task.label}</Badge>
+        </div>
+      )}
+      <div className="flex items-center mt-4">
+        {task.priority && (
+          <>
+            <Flag className={getPriorityClass(task.priority)} size={20} />
+            <span className={`ml-2 ${getPriorityClass(task.priority)}`}>
+              {task.priority}
+            </span>
+          </>
+        )}
       </div>
-    </div>
+    </Card>
   );
 };
 
