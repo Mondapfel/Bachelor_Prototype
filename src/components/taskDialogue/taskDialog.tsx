@@ -1,3 +1,5 @@
+// src/components/taskDialogue/taskDialog.tsx
+
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -32,6 +34,9 @@ export default function TaskDialog() {
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
+      status: "Start ausstehend",
+      priority: "Niedrig",
+      label: "Bug",
     },
   });
 
@@ -116,7 +121,7 @@ export default function TaskDialog() {
       onOpenChange={(open: boolean) => {
         if (!open) {
           setSelectedTask(null);
-          reset({ title: "" });
+          reset();
         }
         setIsOpen(open);
       }}

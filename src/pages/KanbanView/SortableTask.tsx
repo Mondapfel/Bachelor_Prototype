@@ -55,13 +55,13 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const getPriorityClass = (priority: string | undefined) => {
     switch (priority) {
       case "Kritisch":
-        return "text-purple-500";
+        return "text-purple-700 dark:text-purple-400";
       case "Hoch":
-        return "text-red-500";
+        return "text-red-700 dark:text-red-400";
       case "Mittel":
-        return "text-yellow-500";
+        return "text-yellow-600 dark:text-yellow-400";
       case "Niedrig":
-        return "text-green-500";
+        return "text-green-600 dark:text-green-400";
       default:
         return "text-gray-400";
     }
@@ -78,7 +78,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 mb-2 touch-none"
+      className="p-4 mb-2 touch-none dark:bg-slate-800/50"
     >
       <div className="flex justify-between items-start">
         <span className="font-bold">{task.title}</span>
@@ -86,7 +86,12 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       </div>
       {task.label && (
         <div className="mt-2">
-          <Badge variant="secondary">{task.label}</Badge>
+          <Badge
+            className="bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-800/50 dark:border-blue-900 dark:text-blue-300 border border-dashed"
+            variant="secondary"
+          >
+            {task.label}
+          </Badge>
         </div>
       )}
       <div className="flex items-center">

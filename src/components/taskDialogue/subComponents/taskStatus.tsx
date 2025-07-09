@@ -40,7 +40,6 @@ export default function TaskStatus() {
       <Controller
         name="status"
         control={control}
-        defaultValue="Start ausstehend"
         render={({ field }) => {
           return (
             <Select
@@ -50,7 +49,7 @@ export default function TaskStatus() {
               }}
             >
               <SelectTrigger className="w-full h-11">
-                <SelectValue placeholder="Status wählen" />
+                <SelectValue placeholder="Status wählen..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>

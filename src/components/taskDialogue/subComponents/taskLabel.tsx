@@ -28,7 +28,6 @@ export default function TaskLabels() {
       <Label className="opacity-75 text-sm font-medium">Label</Label>
       <Controller
         name="label"
-        defaultValue="Bug"
         control={control}
         render={({ field }) => {
           return (

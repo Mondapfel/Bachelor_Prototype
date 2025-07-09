@@ -38,7 +38,6 @@ export default function TaskPriority() {
       <Controller
         name="priority"
         control={control}
-        defaultValue="Niedrig"
         render={({ field }) => {
           return (
             <Select
@@ -48,7 +47,7 @@ export default function TaskPriority() {
               }}
             >
               <SelectTrigger className="w-full h-11">
-                <SelectValue placeholder="Priorität wählen" />
+                <SelectValue placeholder="Priorität wählen..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
