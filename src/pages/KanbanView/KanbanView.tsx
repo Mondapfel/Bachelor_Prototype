@@ -1,8 +1,10 @@
+// src/pages/KanbanView/KanbanView.tsx
+
 import {
   DndContext,
-  closestCorners,
+  // REMOVE closestCorners and import pointerWithin
+  pointerWithin,
   type DragEndEvent,
-  type DragOverEvent,
   type DragStartEvent,
   PointerSensor,
   useSensor,
@@ -33,6 +35,14 @@ const KanbanView = () => {
     "Erledigt",
   ];
 
+  const tasksById = useMemo(() => {
+    const map = new Map<string, Task>();
+    tasks.forEach((task) => {
+      map.set(task.taskId, task);
+    });
+    return map;
+  }, [tasks]);
+
   const groupedTasks = useMemo(() => {
     const grouped: Record<Status, Task[]> = {
       "Start ausstehend": [],
@@ -41,10 +51,8 @@ const KanbanView = () => {
       Blockiert: [],
       Erledigt: [],
     };
-    (tasks ?? []).forEach((task) => {
-      if (grouped[task.status]) {
-        grouped[task.status].push(task);
-      }
+    tasks.forEach((task) => {
+      if (grouped[task.status]) grouped[task.status].push(task);
     });
     return grouped;
   }, [tasks]);
@@ -59,10 +67,7 @@ const KanbanView = () => {
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks.find((t) => t.taskId === active.id);
-    if (task) {
-      setActiveTask(task);
-    }
+    setActiveTask(tasksById.get(active.id as string) || null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -71,56 +76,43 @@ const KanbanView = () => {
 
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
-
-    const activeTask = tasks.find((t) => t.taskId === activeId);
+    const activeTask = tasksById.get(active.id as string);
     if (!activeTask) return;
 
-    // Determine the new status based on what the task was dropped on
+    const overIsColumn = over.data.current?.type === "Column";
+    const overIsTask = over.data.current?.type === "Task";
+
+    if (active.id === over.id) return;
+
+    // Scenario 1: Reordering tasks within the same column
+    if (overIsTask && activeTask.status === over.data.current?.task.status) {
+      const oldIndex = tasks.findIndex((t) => t.taskId === active.id);
+      const newIndex = tasks.findIndex((t) => t.taskId === over.id);
+      const newTasks = arrayMove(tasks, oldIndex, newIndex);
+      setTasks(newTasks);
+      updateTasks(newTasks, "update");
+      return;
+    }
+
+    // Scenario 2: Moving a task to a different column
     let newStatus: Status | undefined;
-    if (over.data.current?.type === "Column") {
-      newStatus = overId as Status;
-    } else {
-      const overTask = tasks.find((t) => t.taskId === overId);
-      if (overTask) {
-        newStatus = overTask.status;
-      }
-    }
+    if (overIsColumn) newStatus = over.id as Status;
+    if (overIsTask) newStatus = over.data.current?.task.status;
 
-    if (!newStatus) return;
-
-    // Determine if we are reordering or changing status
-    const isChangingColumn = activeTask.status !== newStatus;
-    const isReorderingInSameColumn =
-      over.data.current?.type === "Task" && !isChangingColumn;
-
-    let newTasks = tasks;
-
-    // Handle both status change and reordering
-    if (isChangingColumn) {
-      newTasks = newTasks.map((t) =>
-        t.taskId === activeId ? { ...t, status: newStatus } : t
+    if (newStatus && activeTask.status !== newStatus) {
+      const newTasks = tasks.map((t) =>
+        t.taskId === active.id ? { ...t, status: newStatus } : t
       );
+      setTasks(newTasks);
+      updateTasks(newTasks, "update");
     }
-
-    if (isReorderingInSameColumn && active.id !== over.id) {
-      const oldIndex = newTasks.findIndex((t) => t.taskId === activeId);
-      const newIndex = newTasks.findIndex((t) => t.taskId === overId);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        newTasks = arrayMove(newTasks, oldIndex, newIndex);
-      }
-    }
-
-    // Apply the final state and persist it
-    setTasks(newTasks);
-    updateTasks(newTasks, "update");
   };
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      // THE FIX: Change the collision detection strategy
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >

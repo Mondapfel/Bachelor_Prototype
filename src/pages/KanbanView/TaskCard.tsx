@@ -24,6 +24,8 @@ const TaskCard = ({ task }: TaskCardProps) => {
 
   const getPriorityClass = (priority: string | undefined) => {
     switch (priority) {
+      case "Kritisch":
+        return "text-green-500";
       case "High":
         return "text-red-500";
       case "Medium":

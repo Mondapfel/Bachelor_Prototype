@@ -1,3 +1,5 @@
+// src/pages/KanbanView/SortableTask.tsx
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/data/TasksData";
@@ -28,10 +30,14 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
+    // Hide the original card completely while dragging
+    opacity: isDragging ? 0 : 1,
   };
 
   const getPriorityClass = (priority: string | undefined) => {
     switch (priority) {
+      case "Kritisch":
+        return "text-violet-500";
       case "Hoch":
         return "text-red-500";
       case "Mittel":
@@ -49,7 +55,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`p-4 mb-2 touch-none ${isDragging ? "opacity-50" : ""}`}
+      className="p-4 mb-2 touch-none"
     >
       <div className="flex justify-between items-start">
         <span className="font-bold">{task.title}</span>
