@@ -10,11 +10,33 @@ import {
   useSensor,
   useSensors,
   type DragStartEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import Column from "@/pages/KanbanView/Column";
 import type { Task, Status } from "@/data/TasksData";
 import { useState, type DragEvent } from "react";
+
+function DroppableColumn({
+  id,
+  status,
+  tasks,
+}: {
+  id: string;
+  status: Status;
+  tasks: Task[];
+}) {
+  const { setNodeRef } = useDroppable({
+    id,
+  });
+
+  return (
+    <div ref={setNodeRef}>
+      <Column id={id} status={status} tasks={tasks} />
+    </div>
+  );
+}
+
 
 const KanbanView = () => {
   const { tasks } = useTasksDataStore();
@@ -47,8 +69,18 @@ const KanbanView = () => {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
+    useSensor(KeyboardSensor),
   );
+
+  function findColumnId(
+  taskId: UniqueIdentifier,
+  groupedTasks: Record<Status, Task[]>
+): Status | undefined {
+  return Object.entries(groupedTasks).find(([status, tasks]) =>
+    tasks.some((task) => task.taskId === taskId)
+  )?.[0] as Status | undefined;
+}
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id);
@@ -63,7 +95,7 @@ const KanbanView = () => {
     console.log("Drag end", event);
   }
 
-  return (
+  return (  
     <div className=" items-center gap-2">
       <DndContext
         sensors={sensors}
@@ -74,7 +106,7 @@ const KanbanView = () => {
       >
         <div className="grid grid-cols-5 gap-5 p-5">
           {statusOrder.map((status) => (
-            <Column key={status} status={status} tasks={groupedTasks[status]} />
+            <DroppableColumn key={status} id={status} status={status} tasks={groupedTasks[status]} />
           ))}
         </div>
       </DndContext>

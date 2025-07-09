@@ -1,33 +1,28 @@
+import React from "react";
+import type { Status, Task } from "@/data/TasksData";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { Task } from "@/data/TasksData"; // Make sure Task is imported
+import SortableTask from "./SortableTask";
 
 type ColumnProps = {
-  status: string;
+  id: string;
+  status: Status;
   tasks: Task[];
 };
 
-const Column: React.FC<ColumnProps> = ({ status, tasks }) => {
+const Column: React.FC<ColumnProps> = ({ id, status, tasks }) => {
   return (
-    <div className="flex flex-col">
-      <h3 className="mb-2 font-medium text-gray-700 dark:text-gray-200">
-        {status}
-      </h3>
-
+    <div>
+      <h2 className="font-semibold mb-3">{status}</h2>
       <SortableContext
         items={tasks.map((task) => task.taskId)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="h-250 bg-muted rounded-md p-4">
+        <div className="h-250 column bg-muted rounded-md p-4">
           {tasks.map((task) => (
-            <div key={task.taskId} className="rounded p-2 shadow mb-2">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-500 dark:text-gray-400">⋮</span>
-                <span className="dark:text-gray-200">{task.title}</span>
-              </div>
-            </div>
+            <SortableTask key={task.taskId} task={task} />
           ))}
         </div>
       </SortableContext>
