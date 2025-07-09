@@ -29,7 +29,7 @@ const Column: React.FC<ColumnProps> = ({ id, status, tasks }) => {
   return (
     <div
       ref={setNodeRef}
-      className="flex flex-col p-2 rounded-lg bg-gray-100 min-h-[200px]"
+      className="flex flex-col p-2 rounded-lg bg-gray-100 dark:bg-slate-900 min-h-[200px]"
     >
       <h3 className="text-lg font-bold mb-2 shrink-0">{status}</h3>
 

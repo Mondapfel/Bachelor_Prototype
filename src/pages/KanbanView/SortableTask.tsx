@@ -52,7 +52,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 mb-2 touch-none"
+      className="p-4 mb-2 touch-none dark:bg-slate-800"
     >
       <div className="flex justify-between items-start">
         <span className="font-bold">{task.title}</span>
