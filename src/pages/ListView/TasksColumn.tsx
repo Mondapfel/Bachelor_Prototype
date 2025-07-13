@@ -33,13 +33,13 @@ import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
 const getPriorityClass = (priority: string | undefined) => {
   switch (priority) {
     case "Kritisch":
-      return "text-purple-500";
+      return "text-purple-700 dark:text-purple-400";
     case "Hoch":
-      return "text-red-500";
+      return "text-red-600 dark:text-red-400";
     case "Mittel":
-      return "text-yellow-500";
+      return "text-yellow-600 dark:text-yellow-400";
     case "Niedrig":
-      return "text-green-500";
+      return "text-green-600 dark:text-green-400";
     default:
       return "text-gray-400";
   }

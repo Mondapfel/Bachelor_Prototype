@@ -6,11 +6,35 @@ import { useDroppable, useDndContext } from "@dnd-kit/core";
 import type { Task, Status } from "@/data/TasksData";
 import SortableTask from "./SortableTask";
 import TaskPlaceholder from "./TaskPlaceholder";
+import {
+  Circle,
+  CircleCheckBig,
+  CircleDashed,
+  CircleFadingArrowUp,
+  CircleOff,
+} from "lucide-react";
 
 type ColumnProps = {
   id: string;
   status: Status;
   tasks: Task[];
+};
+
+const renderStatusIcons = (status: Status) => {
+  switch (status) {
+    case "Start ausstehend":
+      return CircleDashed;
+    case "Zu Erledigen":
+      return Circle;
+    case "In Bearbeitung":
+      return CircleFadingArrowUp;
+    case "Erledigt":
+      return CircleCheckBig;
+    case "Blockiert":
+      return CircleOff;
+    default:
+      return null;
+  }
 };
 
 const Column: React.FC<ColumnProps> = ({ id, status, tasks }) => {
@@ -26,9 +50,14 @@ const Column: React.FC<ColumnProps> = ({ id, status, tasks }) => {
   const isOverTaskInThisColumn = tasks.some((t) => t.taskId === over?.id);
   const shouldShowPlaceholder = activeTask && activeTask.status !== id;
 
+  const StatusIcon = renderStatusIcons(status);
+
   return (
     <div className="flex flex-col">
-      <h3 className="text-lg font-bold mb-2 shrink-0">{status}</h3>
+      <div className="flex items-center gap-2 mb-2 shrink-0">
+        {StatusIcon && <StatusIcon className="size-5 text-gray-500" />}
+        <h3 className="text-lg font-bold">{status}</h3>
+      </div>
       <div
         ref={setNodeRef}
         className="flex flex-col flex-grow p-2 rounded-lg bg-gray-100 dark:bg-slate-900/80 min-h-[200px]"
