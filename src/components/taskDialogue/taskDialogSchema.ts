@@ -8,6 +8,7 @@ export const taskFormSchema = z.object({
     status: z.enum(["Start ausstehend", "Zu Erledigen", "In Bearbeitung", "Erledigt", "Blockiert"]),
     priority: z.enum(["Niedrig", "Mittel", "Hoch", "Kritisch"]),
     label: z.enum(["Bug", "Feature", "Dokumentation"]),
+    dueDate: z.date(),
 });
 
 export type taskFormData = z.infer<typeof taskFormSchema>;

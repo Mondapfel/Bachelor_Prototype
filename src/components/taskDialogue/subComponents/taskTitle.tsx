@@ -14,7 +14,7 @@ export default function TaskTitle() {
       <Input
         placeholder="Titel der Aufgabe..."
         {...register("title")}
-        className="h-11"
+        className="h-9"
       />
       {errors.title && (
         <p className="text-red-500 text-sm">{errors.title.message}</p>

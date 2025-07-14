@@ -1,6 +1,3 @@
-import * as React from "react";
-import type { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +13,7 @@ import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 export function DropDownViewColumns({ table }: { table: Table<Task> }) {
   const { tasks } = useTasksDataStore();
 
-  const columnsToHide = ["priority", "status", "erstellt am"];
+  const columnsToHide = ["priority", "status", "erstellt am", "dueDate"];
 
   return (
     <DropdownMenu>
@@ -40,7 +37,11 @@ export function DropDownViewColumns({ table }: { table: Table<Task> }) {
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.id === "priority" ? "Priorität" : column.id}
+                {column.id === "priority"
+                  ? "Priorität"
+                  : column.id === "dueDate"
+                  ? "Fällig am"
+                  : column.id}
               </DropdownMenuCheckboxItem>
             );
           })}

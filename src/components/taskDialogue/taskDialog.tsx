@@ -1,5 +1,3 @@
-// src/components/taskDialogue/taskDialog.tsx
-
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -16,6 +14,7 @@ import TaskLabels from "./subComponents/taskLabel";
 import TaskPriority from "./subComponents/taskPriority";
 import TaskStatus from "./subComponents/taskStatus";
 import TaskTitle from "./subComponents/taskTitle";
+import TaskDueDate from "./subComponents/taskDueDate";
 import { type taskFormData, taskFormSchema } from "./taskDialogSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
@@ -44,11 +43,11 @@ export default function TaskDialog() {
 
   useEffect(() => {
     if (isOpen && selectedTask) {
-      // Update form values when a task is selected and dialog is open
       setValue("title", selectedTask.title);
       setValue("status", selectedTask.status);
       setValue("priority", selectedTask.priority);
       setValue("label", selectedTask.label);
+      setValue("dueDate", selectedTask.dueDate);
     }
   }, [isOpen, selectedTask, setValue]);
 
@@ -62,6 +61,7 @@ export default function TaskDialog() {
         status: data.status,
         priority: data.priority,
         label: data.label,
+        dueDate: data.dueDate,
         isFavorite: false,
         createdAt: new Date(),
       };
@@ -78,7 +78,6 @@ export default function TaskDialog() {
         setIsOpen(false);
       } catch (error) {
         console.log(error);
-
         toast.error("Aufgabe hinzufügen fehlgeschlagen");
       } finally {
         setIsLoading(false);
@@ -92,9 +91,9 @@ export default function TaskDialog() {
             label: data.label,
             priority: data.priority,
             status: data.status,
+            dueDate: data.dueDate,
           };
         }
-
         return t;
       });
 
@@ -146,11 +145,14 @@ export default function TaskDialog() {
             <div className="my-8">
               <div className="grid grid-cols-2 gap-5">
                 <TaskTitle />
-                <TaskStatus />
+                <TaskLabels />
               </div>
               <div className="grid grid-cols-2 gap-5 mt-6">
+                <TaskStatus />
                 <TaskPriority />
-                <TaskLabels />
+              </div>
+              <div className="grid grid-cols-2 gap-5 mt-6">
+                <TaskDueDate />
               </div>
             </div>
             <DialogFooter className="mb-4">

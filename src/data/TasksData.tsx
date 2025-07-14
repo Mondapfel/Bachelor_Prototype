@@ -1,3 +1,5 @@
+// src/data/TasksData.tsx
+
 export type Label = "Dokumentation" | "Bug" | "Feature";
 export type Priority = "Niedrig" | "Mittel" | "Hoch" | "Kritisch";
 export type Status =
@@ -15,6 +17,7 @@ export type Task = {
   priority: Priority;
   status: Status;
   createdAt: Date;
+  dueDate: Date;
 };
 
 export const tasks: Task[] = [
@@ -26,6 +29,7 @@ export const tasks: Task[] = [
     priority: "Hoch",
     status: "Blockiert",
     createdAt: new Date("2025-01-21T10:00:00Z"),
+    dueDate: new Date("2025-02-28T10:00:00Z"),
   },
   {
     taskId: "Task-002",
@@ -35,6 +39,7 @@ export const tasks: Task[] = [
     priority: "Mittel",
     status: "Start ausstehend",
     createdAt: new Date("2025-01-02T12:00:00Z"),
+    dueDate: new Date("2025-03-15T12:00:00Z"),
   },
   {
     taskId: "Task-003",
@@ -44,6 +49,7 @@ export const tasks: Task[] = [
     priority: "Niedrig",
     status: "Erledigt",
     createdAt: new Date("2025-05-30T09:30:00Z"),
+    dueDate: new Date("2025-06-30T09:30:00Z"),
   },
   {
     taskId: "Task-004",
@@ -53,6 +59,7 @@ export const tasks: Task[] = [
     priority: "Hoch",
     status: "In Bearbeitung",
     createdAt: new Date("2025-06-01T15:00:00Z"),
+    dueDate: new Date("2025-07-01T15:00:00Z"),
   },
   {
     taskId: "Task-005",
@@ -62,6 +69,7 @@ export const tasks: Task[] = [
     priority: "Kritisch",
     status: "Zu Erledigen",
     createdAt: new Date("2025-06-05T10:00:00Z"),
+    dueDate: new Date("2025-07-05T10:00:00Z"),
   },
   {
     taskId: "Task-006",
@@ -71,6 +79,7 @@ export const tasks: Task[] = [
     priority: "Hoch",
     status: "In Bearbeitung",
     createdAt: new Date("2025-06-10T12:00:00Z"),
+    dueDate: new Date("2025-07-10T12:00:00Z"),
   },
   {
     taskId: "Task-007",
@@ -80,6 +89,7 @@ export const tasks: Task[] = [
     priority: "Mittel",
     status: "Zu Erledigen",
     createdAt: new Date("2025-06-15T14:00:00Z"),
+    dueDate: new Date("2025-07-15T14:00:00Z"),
   },
   {
     taskId: "Task-008",
@@ -89,6 +99,7 @@ export const tasks: Task[] = [
     priority: "Kritisch",
     status: "In Bearbeitung",
     createdAt: new Date("2025-06-20T16:00:00Z"),
+    dueDate: new Date("2025-07-20T16:00:00Z"),
   },
   {
     taskId: "Task-009",
@@ -98,6 +109,7 @@ export const tasks: Task[] = [
     priority: "Niedrig",
     status: "Erledigt",
     createdAt: new Date("2025-06-25T10:00:00Z"),
+    dueDate: new Date("2025-07-25T10:00:00Z"),
   },
   {
     taskId: "Task-010",
@@ -107,5 +119,6 @@ export const tasks: Task[] = [
     priority: "Hoch",
     status: "In Bearbeitung",
     createdAt: new Date("2025-07-01T12:00:00Z"),
+    dueDate: new Date("2025-08-01T12:00:00Z"),
   },
 ];

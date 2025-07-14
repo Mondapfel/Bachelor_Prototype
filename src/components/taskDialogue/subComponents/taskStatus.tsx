@@ -36,7 +36,7 @@ export default function TaskStatus() {
   const { control } = useFormContext<taskFormData>();
   return (
     <div className="flex flex-col gap-2">
-      <Label className="opacity-75 text-sm font-medium">Task Status</Label>
+      <Label className="opacity-75 text-sm font-medium">Status</Label>
       <Controller
         name="status"
         control={control}

@@ -248,6 +248,18 @@ export const tasksColumns: ColumnDef<Task>[] = [
     filterFn: "priorityFilter",
   },
   {
+    accessorKey: "dueDate",
+    header: ({ column }) => (
+      <SortableHeader column={column} label="Fällig am" />
+    ),
+    cell: ({ row }) => {
+      const date = row.original.dueDate;
+      const formattedDate = formatDate(date);
+
+      return formattedDate;
+    },
+  },
+  {
     accessorKey: "erstellt am",
     header: ({ column }) => (
       <SortableHeader column={column} label="Erstellt am" />
