@@ -10,7 +10,7 @@ export default function TaskDueDate() {
 
   return (
     <div className="flex flex-col gap-2">
-      <Label className="opacity-75 text-sm font-medium">Fällig am</Label>
+      <Label className="opacity-75 text-sm font-medium">Frist</Label>
       <Controller
         name="dueDate"
         control={control}

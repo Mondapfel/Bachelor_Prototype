@@ -252,9 +252,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "dueDate",
-    header: ({ column }) => (
-      <SortableHeader column={column} label="Fällig am" />
-    ),
+    header: ({ column }) => <SortableHeader column={column} label="Frist" />,
     cell: ({ row }) => {
       const date = row.original.dueDate;
       const formattedDate = formatDate(date);
