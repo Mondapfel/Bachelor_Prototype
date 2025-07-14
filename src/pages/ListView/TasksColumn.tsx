@@ -29,6 +29,7 @@ import {
 import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
+import { prioritySortingFn, statusSortingFn } from "./sortingFns";
 
 const getPriorityClass = (priority: string | undefined) => {
   switch (priority) {
@@ -103,9 +104,9 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
   const isSorted = column.getIsSorted();
   const SortingIcon =
     isSorted === "asc"
-      ? ArrowUp
-      : isSorted === "desc"
       ? ArrowDown
+      : isSorted === "desc"
+      ? ArrowUp
       : ArrowUpDown;
   return (
     <DropdownMenu>
@@ -227,6 +228,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
       );
     },
     filterFn: "statusFilter",
+    sortingFn: statusSortingFn,
   },
   {
     accessorKey: "priority",
@@ -246,6 +248,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
       );
     },
     filterFn: "priorityFilter",
+    sortingFn: prioritySortingFn,
   },
   {
     accessorKey: "dueDate",
@@ -260,7 +263,7 @@ export const tasksColumns: ColumnDef<Task>[] = [
     },
   },
   {
-    accessorKey: "erstellt am",
+    accessorKey: "createdAt",
     header: ({ column }) => (
       <SortableHeader column={column} label="Erstellt am" />
     ),

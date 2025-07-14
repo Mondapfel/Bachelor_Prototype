@@ -66,7 +66,7 @@ export default function TasksArea() {
       pagination,
       sorting,
     },
-    filterFns: { titleFilter, priorityFilter, statusFilter }, 
+    filterFns: { titleFilter, priorityFilter, statusFilter },
   });
 
   useEffect(() => {
@@ -96,14 +96,11 @@ export default function TasksArea() {
   return (
     <div className=" px-7 mt-5">
       <Card className="dark:bg-slate-900/80">
-        {/* card header */}
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <SearchInput />
-              {/* status drop down */}
               <StatusDropDown />
-              {/* priority drop down */}
               <PriorityDropDown />
 
               {(checkedPriorities.length !== 0 ||
@@ -124,7 +121,6 @@ export default function TasksArea() {
               )}
             </div>
 
-            {/* DropDownViewColumns */}
             <DropDownViewColumns table={table} />
           </div>
         </CardHeader>

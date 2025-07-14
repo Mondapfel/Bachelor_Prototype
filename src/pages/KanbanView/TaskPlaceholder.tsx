@@ -7,11 +7,20 @@ import {
   ArrowBigUp,
   ShieldAlert,
   ChevronsLeftRightEllipsis,
+  CalendarDays,
 } from "lucide-react";
 
 interface TaskPlaceholderProps {
   task: Task;
 }
+
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 const renderPriorityIcons = (priority: Priority) => {
   switch (priority) {
@@ -65,13 +74,19 @@ const TaskPlaceholder = ({ task }: TaskPlaceholderProps) => {
           </Badge>
         </div>
       )}
-      <div className="flex items-center mt-4">
-        {task.priority && PriorityIcon && (
-          <>
-            <PriorityIcon className={priorityColor} size={20} />
-            <span className={`ml-2 ${priorityColor}`}>{task.priority}</span>
-          </>
-        )}
+      <div className="flex justify-between items-center mt-4">
+        <div className="flex items-center">
+          {task.priority && PriorityIcon && (
+            <>
+              <PriorityIcon className={priorityColor} size={20} />
+              <span className={`ml-2 ${priorityColor}`}>{task.priority}</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+          <CalendarDays size={16} className="mr-2" />
+          <span>{formatDate(task.dueDate)}</span>
+        </div>
       </div>
     </Card>
   );

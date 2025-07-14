@@ -9,11 +9,20 @@ import {
   ArrowBigUp,
   ShieldAlert,
   ChevronsLeftRightEllipsis,
+  CalendarDays,
 } from "lucide-react";
 
 interface SortableTaskProps {
   task: Task;
 }
+
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 const renderPriorityIcons = (priority: Priority) => {
   switch (priority) {
@@ -49,7 +58,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
-    opacity: isDragging ? 0 : 1,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   const getPriorityClass = (priority: string | undefined) => {
@@ -78,7 +87,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-4 mb-2 touch-none dark:bg-slate-800/50"
+      className="p-4 mb-2 touch-none dark:bg-slate-800/50 cursor-grab"
     >
       <div className="flex justify-between items-start">
         <span className="font-bold">{task.title}</span>
@@ -94,13 +103,19 @@ const SortableTask = ({ task }: SortableTaskProps) => {
           </Badge>
         </div>
       )}
-      <div className="flex items-center">
-        {task.priority && PriorityIcon && (
-          <>
-            <PriorityIcon className={priorityColor} size={20} />
-            <span className={`ml-2 ${priorityColor}`}>{task.priority}</span>
-          </>
-        )}
+      <div className="flex justify-between items-center mt-4">
+        <div className="flex items-center">
+          {task.priority && PriorityIcon && (
+            <>
+              <PriorityIcon className={priorityColor} size={20} />
+              <span className={`ml-2 ${priorityColor}`}>{task.priority}</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+          <CalendarDays size={16} className="mr-2" />
+          <span>{formatDate(task.dueDate)}</span>
+        </div>
       </div>
     </Card>
   );
