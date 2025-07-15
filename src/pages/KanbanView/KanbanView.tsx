@@ -14,6 +14,7 @@ import type { Task, Status } from "@/data/TasksData";
 import { useState, useEffect, useMemo } from "react";
 import Column from "./Column";
 import SortableTask from "./SortableTask";
+import TaskDialog from "@/components/taskDialogue/taskDialog";
 
 const KanbanView = () => {
   const { tasks: initialTasks, updateTasks } = useTasksDataStore();
@@ -106,26 +107,34 @@ const KanbanView = () => {
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={pointerWithin}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="grid grid-cols-5 gap-5 p-5">
-        {statusOrder.map((status) => (
-          <Column
-            key={status}
-            id={status}
-            status={status}
-            tasks={groupedTasks[status] ?? []}
-          />
-        ))}
+    <div className="p-6 space-y-4">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Kanban Board</h1>
+        <div className="space-x-2">
+          <TaskDialog />
+        </div>
       </div>
-      <DragOverlay>
-        {activeTask ? <SortableTask task={activeTask} /> : null}
-      </DragOverlay>
-    </DndContext>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={pointerWithin}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="grid grid-cols-5 gap-5 p-5">
+          {statusOrder.map((status) => (
+            <Column
+              key={status}
+              id={status}
+              status={status}
+              tasks={groupedTasks[status] ?? []}
+            />
+          ))}
+        </div>
+        <DragOverlay>
+          {activeTask ? <SortableTask task={activeTask} /> : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 };
 

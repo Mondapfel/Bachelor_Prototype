@@ -14,7 +14,7 @@ const Header: React.FC<Props> = ({ view, setView }) => {
 
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-slate-950 shadow">
-      <h1 className="text-xl font-bold">Tasky</h1>
+      <h1 className="text-2xl font-bold">Tasky</h1>
       <div className="flex gap-4">
         <button
           onClick={() => setView(view === "list" ? "kanban" : "list")}

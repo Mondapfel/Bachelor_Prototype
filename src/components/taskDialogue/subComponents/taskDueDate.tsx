@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/datePicker";
 
 export default function TaskDueDate() {
   const {
@@ -15,16 +15,7 @@ export default function TaskDueDate() {
         name="dueDate"
         control={control}
         render={({ field }) => (
-          <Input
-            type="date"
-            className="h-11"
-            value={
-              field.value
-                ? new Date(field.value).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={(e) => field.onChange(new Date(e.target.value))}
-          />
+          <DatePicker value={field.value} onChange={field.onChange} />
         )}
       />
       {errors.dueDate && (
