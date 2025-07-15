@@ -128,7 +128,6 @@ const getFieldsByRule = (title: string): Partial<taskFormData> => {
     }
   }
 
-  // Handle Due Date separately as it's independent of the topic.
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -142,7 +141,7 @@ const getFieldsByRule = (title: string): Partial<taskFormData> => {
   return updates;
 };
 
-// Strategy 2: AI Logic (Placeholder for your future LLM implementation)
+// Strategy 2: AI Logic (Placeholder)
 const getFieldsByAI = async (
   title: string
 ): Promise<Partial<taskFormData> | null> => {
@@ -151,7 +150,7 @@ const getFieldsByAI = async (
       1. Get the current date: const today = new Date().toISOString().split('T')[0];
       2. Create a detailed prompt for the LLM API.
       3. Send the prompt and get a JSON response like:
-         { "priority": "Kritisch", "label": "Bug", "dueDate": "2025-07-16" }
+          { "priority": "Kritisch", "label": "Bug", "dueDate": "2025-07-16" }
       4. Parse the response and return the updates object.
       5. Handle date strings by converting them back to Date objects.
     */
@@ -159,14 +158,13 @@ const getFieldsByAI = async (
   return null;
 };
 
-// A separate component to contain the adaptation logic
-function AdaptationController() {
+function AdaptationController({ isEditing }: { isEditing: boolean }) {
   const { control, setValue, getValues } = useFormContext<taskFormData>();
   const title = useWatch({ control, name: "title" });
 
   useEffect(() => {
     const applyAdaptation = async () => {
-      if (title.length < 5) return;
+      if (isEditing || title.length < 5) return;
 
       let predictedFields: Partial<taskFormData> | null = null;
 
@@ -176,7 +174,6 @@ function AdaptationController() {
         predictedFields = await getFieldsByAI(title);
       }
 
-      // If predictions were made, update the form state for each field
       if (predictedFields) {
         Object.entries(predictedFields).forEach(([fieldName, value]) => {
           const key = fieldName as keyof taskFormData;
@@ -192,7 +189,7 @@ function AdaptationController() {
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [title, setValue, getValues]);
+  }, [title, setValue, getValues, isEditing]);
 
   return null;
 }
@@ -316,7 +313,7 @@ export default function TaskDialog() {
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <AdaptationController />
+          <AdaptationController isEditing={!!selectedTask} />
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="my-8">
               <div className="grid grid-cols-2 gap-5">

@@ -139,6 +139,7 @@ export const tasks: Task[] = [
     createdAt: new Date("2025-07-02T11:00:00Z"),
     dueDate: new Date("2025-08-15T11:00:00Z"),
   },
+  /*
   {
     taskId: "Task-013",
     title: "Behebung des Caching-Problems im Browser",
@@ -269,4 +270,5 @@ export const tasks: Task[] = [
     createdAt: new Date("2025-07-14T08:00:00Z"),
     dueDate: new Date("2025-07-17T08:00:00Z"),
   },
+  */
 ];
