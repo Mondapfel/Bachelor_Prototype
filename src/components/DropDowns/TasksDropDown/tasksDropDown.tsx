@@ -15,23 +15,16 @@ import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import type { MenuItemType } from "./types";
 import type { Label, Task } from "@/data/TasksData";
 import { toast } from "sonner";
-import { _success } from "zod/v4/core";
 
 export function TaskDropDown({
-  onOpen,
-  onClose,
+  task,
+  onOpenChange,
 }: {
-  onOpen: () => void;
-  onClose: () => void;
+  task: Task;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  // selected label
-  const [selectedLabel, setSelectedLabel] = useState("Bug");
-
-  //selected task
-  const { selectedTask, updateTasks } = useTasksDataStore();
-  const { tasks } = useTasksDataStore();
-
-  //menu items array state
+  const [selectedLabel, setSelectedLabel] = useState<Label>(task.label);
+  const { tasks, updateTasks } = useTasksDataStore();
   const [menuItemsArray, setMenuItemsArray] =
     useState<MenuItemType[]>(MENU_ITEMS);
 
@@ -41,44 +34,31 @@ export function TaskDropDown({
         if (item.kind === "favorite") {
           return {
             ...item,
-            label: selectedTask?.isFavorite
-              ? "Favorit entfernen"
-              : "Favorisieren",
+            label: task.isFavorite ? "Favorit entfernen" : "Favorisieren",
           };
         }
         return item;
       })
     );
-  }, [selectedTask]);
+  }, [task]);
 
   useEffect(() => {
-    if (selectedTask) {
-      setSelectedLabel(selectedTask.label);
+    if (task) {
+      setSelectedLabel(task.label);
     }
-  }, [selectedTask]);
+  }, [task]);
 
-  const clickedLabelItem = async (newLabel: string) => {
-    const validLabels: Label[] = ["Bug", "Feature", "Dokumentation"];
-    if (!validLabels.includes(newLabel as Label)) {
-      console.error(`Der Typ ${newLabel} ist nicht zulässig`);
-      return;
-    }
-
-    if (selectedTask && tasks) {
-      const updatedTask: Task = {
-        ...selectedTask,
-        label: newLabel as Label,
-      };
-
-      const updateTasksArray = tasks.map((task) =>
-        task.taskId === selectedTask.taskId ? updatedTask : task
+  const clickedLabelItem = async (newLabel: Label) => {
+    if (task && tasks) {
+      const updatedTask: Task = { ...task, label: newLabel };
+      const updateTasksArray = tasks.map((t) =>
+        t.taskId === task.taskId ? updatedTask : t
       );
-
       try {
-        const result = await updateTasks(updateTasksArray);
-        toast[result ? "success" : "error"](
-          result
-            ? `[${selectedTask.taskId}] wurde erfolgreich aktualisiert!`
+        const result = await updateTasks(updateTasksArray, "update");
+        toast[result.success ? "success" : "error"](
+          result.success
+            ? `[${task.taskId}] wurde erfolgreich aktualisiert!`
             : `Aufgabe aktualisieren fehlgeschlagen`
         );
       } catch (error) {
@@ -88,16 +68,24 @@ export function TaskDropDown({
   };
 
   return (
-    <DropdownMenu
-      onOpenChange={(open: boolean) => (open ? onOpen() : onClose())}
-    >
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">
-          <Ellipsis />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Ellipsis className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent
+        className="w-56"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DropdownMenuGroup>
           {menuItemsArray.map((item) => (
             <MenuItem
@@ -106,6 +94,7 @@ export function TaskDropDown({
               Icon={item.icon}
               label={item.label}
               shortcut={item.shortcut}
+              task={task}
             />
           ))}
         </DropdownMenuGroup>
@@ -124,6 +113,7 @@ export function TaskDropDown({
           label="Löschen"
           shortcut=""
           className="text-red-500"
+          task={task}
         />
       </DropdownMenuContent>
     </DropdownMenu>

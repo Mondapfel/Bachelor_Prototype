@@ -27,8 +27,6 @@ import {
   EyeOff,
 } from "lucide-react";
 import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
-import { useTasksDataStore } from "@/hooks/useTasksDataStore";
-import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
 import { prioritySortingFn, statusSortingFn } from "./sortingFns";
 
 const getPriorityClass = (priority: string | undefined) => {
@@ -275,23 +273,9 @@ export const tasksColumns: ColumnDef<Task>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      return <ShowTaskDropDown task={row.original} />;
+      return <TaskDropDown task={row.original} />;
     },
   },
 ];
 
-function ShowTaskDropDown({ task }: { task: Task }) {
-  const { setSelectedTask } = useTasksDataStore();
-  const { isOpen } = useOpenDialogStore();
 
-  return (
-    <TaskDropDown
-      onOpen={() => setSelectedTask(task)}
-      onClose={() => {
-        if (!isOpen) {
-          setSelectedTask(null);
-        }
-      }}
-    />
-  );
-}

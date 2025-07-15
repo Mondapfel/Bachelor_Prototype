@@ -15,11 +15,17 @@ import { useState, useEffect, useMemo } from "react";
 import Column from "./Column";
 import SortableTask from "./SortableTask";
 import TaskDialog from "@/components/taskDialogue/taskDialog";
+import { useKanbanSelectionStore } from "@/hooks/useKanbanSelectionStore";
 
 const KanbanView = () => {
   const { tasks: initialTasks, updateTasks } = useTasksDataStore();
   const [tasks, setTasks] = useState<Task[]>(initialTasks ?? []);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const { setSelectedTaskId } = useKanbanSelectionStore();
+
+  const handleOutsideClick = () => {
+    setSelectedTaskId(null);
+  };
 
   useEffect(() => {
     setTasks(initialTasks ?? []);
@@ -107,8 +113,11 @@ const KanbanView = () => {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex justify-between items-center">
+    <div
+      className="p-6 space-y-4 flex flex-col h-full overflow-hidden"
+      onClick={handleOutsideClick}
+    >
+      <div className="flex justify-between items-center flex-shrink-0">
         <h1 className="text-2xl font-bold">Kanban Board</h1>
         <div className="space-x-2">
           <TaskDialog />
@@ -120,15 +129,17 @@ const KanbanView = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-5 gap-5 p-5">
-          {statusOrder.map((status) => (
-            <Column
-              key={status}
-              id={status}
-              status={status}
-              tasks={groupedTasks[status] ?? []}
-            />
-          ))}
+        <div className="overflow-x-auto pb-4">
+          <div className="grid grid-cols-5 gap-5 p-1 min-w-max">
+            {statusOrder.map((status) => (
+              <Column
+                key={status}
+                id={status}
+                status={status}
+                tasks={groupedTasks[status] ?? []}
+              />
+            ))}
+          </div>
         </div>
         <DragOverlay>
           {activeTask ? <SortableTask task={activeTask} /> : null}

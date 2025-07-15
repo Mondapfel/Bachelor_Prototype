@@ -8,11 +8,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LABEL_OPTIONS } from "./constants";
 import { Tag } from "lucide-react";
+import type { Label } from "@/data/TasksData";
 
 interface LabelSubMenuProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  onClickedLabelItem: (value: string) => void;
+  value: Label;
+  onValueChange: (value: Label) => void;
+  onClickedLabelItem: (value: Label) => void;
 }
 
 export function LabelSubMenu({
@@ -21,8 +22,9 @@ export function LabelSubMenu({
   onClickedLabelItem,
 }: LabelSubMenuProps) {
   const handleValueChange = (newValue: string) => {
-    onValueChange(newValue);
-    onClickedLabelItem(newValue);
+    const newLabel = newValue as Label;
+    onValueChange(newLabel);
+    onClickedLabelItem(newLabel);
   };
 
   return (

@@ -6,8 +6,8 @@ import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import type { LucideIcon } from "lucide-react";
 import { handleMenuItemClick } from "./utils";
 import type { Kind } from "./types";
-import { toast } from "sonner";
 import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
+import { type Task } from "@/data/TasksData";
 
 export function MenuItem({
   Icon,
@@ -15,21 +15,26 @@ export function MenuItem({
   label,
   shortcut,
   className,
+  task,
 }: {
   Icon: LucideIcon;
   kind: Kind;
   label: string;
   shortcut: string;
   className?: string;
+  task: Task;
 }) {
-  const { tasks, selectedTask, updateTasks } = useTasksDataStore();
+  const { tasks, updateTasks, setSelectedTask } = useTasksDataStore();
   const { setIsOpen } = useOpenDialogStore();
 
   return (
     <DropdownMenuItem
-      onClick={() =>
-        handleMenuItemClick(kind, tasks, selectedTask, updateTasks, setIsOpen)
-      }
+      onClick={() => {
+        if (kind === 'edit') {
+            setSelectedTask(task);
+        }
+        handleMenuItemClick(kind, task, tasks, updateTasks, setIsOpen);
+      }}
     >
       <Icon className={`mr-2 h-4 w-4 ${className}`} />
       <span className={`${className}`}>{label}</span>
