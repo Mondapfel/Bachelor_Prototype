@@ -1,7 +1,7 @@
 import type { Row } from "@tanstack/react-table";
 import type { Task } from "@/data/TasksData";
 
-const priorityOrder = ["Niedrig", "Mittel", "Hoch", "Kritisch"];
+const priorityOrder = ["Kritisch", "Hoch", "Mittel", "Niedrig"];
 const statusOrder = [
   "Start ausstehend",
   "Zu Erledigen",
