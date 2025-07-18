@@ -14,7 +14,7 @@ import { tasksColumns } from "./TasksColumn";
 import { TasksTable } from "./TaskTable";
 import PaginationArea from "./pagination/PaginationArea";
 import { useCheckedPrioritiesStore } from "@/hooks/useCheckedPrioritiesStore";
-import { useCheckedStatusesStore } from "@/hooks/useCheckedStatusStore";
+import { useCheckedStatusStore } from "@/hooks/useCheckedStatusStore";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 import TableSkeleton from "./TableSkeleton";
 import { useQueryStore } from "@/hooks/useQueryStore";
@@ -36,7 +36,7 @@ import { TasksSelected } from "./TasksSelected";
 export default function TasksArea() {
   const { setCheckedPriorities, checkedPriorities } =
     useCheckedPrioritiesStore();
-  const { setCheckedStatuses, checkedStatuses } = useCheckedStatusesStore();
+  const { setCheckedStatus, checkedStatuses } = useCheckedStatusStore();
   const { tasks } = useTasksDataStore();
 
   const { query } = useQueryStore();
@@ -109,7 +109,7 @@ export default function TasksArea() {
                   <Button
                     onClick={() => {
                       setCheckedPriorities([]);
-                      setCheckedStatuses([]);
+                      setCheckedStatus([]);
                     }}
                     variant={"ghost"}
                     className="h-10"

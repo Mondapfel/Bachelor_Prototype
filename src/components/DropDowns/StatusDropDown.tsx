@@ -28,7 +28,7 @@ import {
   Plus,
   type LucideIcon,
 } from "lucide-react";
-import { useCheckedStatusesStore } from "@/hooks/useCheckedStatusStore";
+import { useCheckedStatusStore } from "@/hooks/useCheckedStatusStore";
 import { type Status } from "@/data/TasksData";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
 
@@ -74,7 +74,7 @@ const statusesArray: SingleStatusItem[] = [
 
 export function StatusDropDown() {
   const [open, setOpen] = React.useState(false);
-  const { checkedStatuses, setCheckedStatuses } = useCheckedStatusesStore();
+  const { checkedStatuses, setCheckedStatus } = useCheckedStatusStore();
 
   const { tasks } = useTasksDataStore();
 
@@ -100,7 +100,7 @@ export function StatusDropDown() {
       ? checkedStatuses.filter((s) => s !== castedStatus)
       : [...checkedStatuses, castedStatus];
 
-    setCheckedStatuses(newCheckedStatuses);
+    setCheckedStatus(newCheckedStatuses);
   }
 
   const countStatuses: SingleStatusItem[] = React.useMemo(() => {

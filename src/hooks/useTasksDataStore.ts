@@ -4,6 +4,8 @@ import { type Task, tasks } from "../data/TasksData";
 export interface useTasksDataStoreInterface {
   tasks: Task[] | null;
   selectedTask: Task | null;
+  // NEW: Add lastCreatedTask to the store's state
+  lastCreatedTask: Task | null; 
   setSelectedTask: (task: Task | null) => void;
   setTasks: (tasks: Task[]) => void;
   fetchTasks: () => Promise<void>;
@@ -18,6 +20,8 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
   // States
   tasks: null,
   selectedTask: null,
+  // NEW: Initialize lastCreatedTask as null
+  lastCreatedTask: null,
 
   // Actions
   setTasks: (tasksProp) => {
@@ -48,10 +52,7 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
     updatedTasksArray: Task[],
     operation: string | undefined
   ) => {
-    // Variable to store a success message based on the operation type
     let successMessage = "";
-
-    // Determine the success message based on the operation type
     switch (operation) {
       case "copy":
         successMessage = "Die Aufgabe wurde erfolgreich dupliziert.";
@@ -66,63 +67,47 @@ export const useTasksDataStore = create<useTasksDataStoreInterface>((set) => ({
         successMessage = "Operation erfolgreich.";
         break;
     }
-
     try {
-      // Simulate an asynchronous operation (e.g., API call) with a delay
       const result = await new Promise<{ success: boolean; message: string }>(
         (resolve) => {
           setTimeout(() => {
-            // Update the state with the new tasks array
             set({ tasks: updatedTasksArray });
-
-            // Resolve the Promise with a success status and message
             resolve({
               success: true,
               message: successMessage,
             });
-          }, 1233); // Simulate a delay of 1233 milliseconds
+          }, 1233);
         }
       );
-
-      // Return the result of the resolved Promise
       return result;
     } catch (error: unknown) {
       console.log(error);
-
-      // If an error occurs, return a failure status and a generic error message
       return { success: false, message: "Etwas ist schiefgelaufen!" };
     }
   },
 
-  // New function: addTask
   addTask: async (task: Task) => {
     try {
-      // Simulate an asynchronous operation (e.g., API call) with a delay
       const result = await new Promise<{ success: boolean; message: string }>(
         (resolve) => {
           setTimeout(() => {
-            // Update the state by adding the new task to the tasks array
             set((state) => {
               const updatedTasks = state.tasks
                 ? [...state.tasks, task]
                 : [task];
-              return { tasks: updatedTasks };
+              // NEW: When a task is added, update lastCreatedTask
+              return { tasks: updatedTasks, lastCreatedTask: task };
             });
-
-            // Resolve the Promise with a success status and message
             resolve({
               success: true,
               message: "Aufgabe erfolgreich hinzugefügt!",
             });
-          }, 1000); // Simulate a delay of 1000 milliseconds
+          }, 1000);
         }
       );
-
       return result;
     } catch (error) {
       console.log(error);
-
-      // If an error occurs, return a failure status and a generic error message
       return { success: false, message: "Aufgabe hinzufügen fehlgeschlagen!" };
     }
   },

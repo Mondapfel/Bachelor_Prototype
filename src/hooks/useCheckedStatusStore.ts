@@ -1,14 +1,14 @@
 import type { Status } from "@/data/TasksData";
 import { create } from "zustand";
 
-interface useCheckedStatusesStoreInterface {
+interface useCheckedStatusStoreInterface {
     checkedStatuses: Status[];
-    setCheckedStatuses: (statusProp: Status[]) => void;
+    setCheckedStatus: (statusProp: Status[]) => void;
 }
 
-export const useCheckedStatusesStore = create<useCheckedStatusesStoreInterface>(
+export const useCheckedStatusStore = create<useCheckedStatusStoreInterface>(
     (set) => ({
         checkedStatuses: [],
-        setCheckedStatuses: (statuses) => set({ checkedStatuses: statuses}),
+        setCheckedStatus: (statuses) => set({ checkedStatuses: statuses}),
     })
 )

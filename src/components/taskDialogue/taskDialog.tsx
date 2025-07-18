@@ -30,6 +30,7 @@ import { type Task } from "@/data/TasksData";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdaptationModes, CURRENT_ADAPTATION_MODE } from "@/lib/adaptionConfig";
+import OpenAI from "openai";
 
 // A more robust, nested rule-based logic
 const getFieldsByRule = (title: string): Partial<taskFormData> => {
@@ -142,20 +143,85 @@ const getFieldsByRule = (title: string): Partial<taskFormData> => {
 };
 
 // Strategy 2: AI Logic (Placeholder)
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+const openai = new OpenAI({
+  apiKey: apiKey,
+  // 2. This flag is required to acknowledge you're running this in a browser
+  dangerouslyAllowBrowser: true,
+});
+
 const getFieldsByAI = async (
   title: string
 ): Promise<Partial<taskFormData> | null> => {
-  /*
-      In the future, this function will:
-      1. Get the current date: const today = new Date().toISOString().split('T')[0];
-      2. Create a detailed prompt for the LLM API.
-      3. Send the prompt and get a JSON response like:
-          { "priority": "Kritisch", "label": "Bug", "dueDate": "2025-07-16" }
-      4. Parse the response and return the updates object.
-      5. Handle date strings by converting them back to Date objects.
-    */
-  console.log("AI prediction would run for:", title);
-  return null;
+  if (title.length < 10) return null; // Don't run for very short titles
+
+  // Define the structure and constraints for the AI
+  const availableLabels = ["Bug", "Feature", "Dokumentation"];
+  const availablePriorities = ["Kritisch", "Hoch", "Mittel", "Niedrig"];
+  const availableStatuses = [
+    "Start ausstehend",
+    "Zu Erledigen",
+    "In Bearbeitung",
+    "Blockiert",
+    "Erledigt",
+  ];
+  const currentDate = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD format
+
+  // Construct a detailed prompt for reliable JSON output
+  const prompt = `
+    You are an expert German project management assistant. Analyze the user's task title and provide structured suggestions in JSON format.
+    The user is German, so interpret terms like "morgen" (tomorrow) or "dringend" (urgent) accordingly.
+
+    Current Date: ${currentDate}
+    Task Title: "${title}"
+
+    Instructions:
+    1.  **label**: Choose the most appropriate label from this list: ${JSON.stringify(
+      availableLabels
+    )}.
+    2.  **priority**: Choose the most appropriate priority from this list: ${JSON.stringify(
+      availablePriorities
+    )}.
+    3.  **status**: Choose a logical starting status from this list: ${JSON.stringify(
+      availableStatuses
+    )}.
+    4.  **dueDate**: If a date is mentioned (e.g., "heute", "morgen", "nächsten Freitag"), calculate the date in YYYY-MM-DD format. If no date is mentioned, return null.
+
+    Output:
+    Return ONLY a valid JSON object with the keys "label", "priority", "status", and "dueDate".
+  `;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }, // Enforce JSON output
+    });
+
+    const responseContent = completion.choices[0].message.content;
+
+    if (responseContent) {
+      const suggestions = JSON.parse(responseContent);
+      const updates: Partial<taskFormData> = {};
+
+      if (suggestions.label) updates.label = suggestions.label;
+      if (suggestions.priority) updates.priority = suggestions.priority;
+      if (suggestions.status) updates.status = suggestions.status;
+
+      // Convert date string back to a Date object if it exists
+      if (suggestions.dueDate) {
+        updates.dueDate = new Date(suggestions.dueDate);
+      }
+
+      return updates;
+    }
+  } catch (error) {
+    console.error("Error fetching OpenAI suggestions:", error);
+    toast.error("AI-Vorschlag fehlgeschlagen.");
+  }
+
+  return null; // Return null if anything fails
 };
 
 function AdaptationController({ isEditing }: { isEditing: boolean }) {
@@ -277,6 +343,8 @@ export default function TaskDialog() {
             : `Aufgabe aktualisieren fehlgeschlagen`
         );
       }
+      reset();
+      setSelectedTask(null);
 
       setIsLoading(false);
       setIsOpen(false);

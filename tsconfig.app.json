@@ -29,5 +29,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "src/data.ts"]
+  "include": ["src", "src/data.ts", "example.mjs"]
 }
