@@ -9,11 +9,32 @@ import joblib
 import os
 
 # --- Configuration ---
-INPUT_DATA_FILE = "training_data_llm_v6_validated_corrected.csv"
+# INPUT_DATA_FILE = "training_data_llm_v7_enhanced.csv"
 MODEL_OUTPUT_DIR = "models"
 if not os.path.exists(MODEL_OUTPUT_DIR):
     os.makedirs(MODEL_OUTPUT_DIR)
 
+# --- 1. Load and Combine Datasets ---
+CLEAN_DATA_FILE = "training_data_llm_v7_enhanced.csv"
+NOISY_DATA_FILE = "training_data_llm_v8_noisy.csv"
+
+print(f"Loading and combining datasets...")
+try:
+    df_clean = pd.read_csv(CLEAN_DATA_FILE)
+    df_noisy = pd.read_csv(NOISY_DATA_FILE)
+    
+    # Combine the two datasets
+    df_combined = pd.concat([df_clean, df_noisy], ignore_index=True)
+
+    # IMPORTANT: Shuffle the dataset to mix clean and noisy rows
+    df = df_combined.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    print(f"Combined dataset created successfully with {len(df)} rows.")
+except FileNotFoundError as e:
+    print(f"ERROR: Could not find a data file: {e}")
+    exit()
+
+"""
 # --- 1. Load the Dataset ---
 print(f"Loading dataset from '{INPUT_DATA_FILE}'...")
 try:
@@ -22,6 +43,7 @@ try:
 except FileNotFoundError:
     print(f"ERROR: The file '{INPUT_DATA_FILE}' was not found. Please make sure it's in the same directory.")
     exit()
+"""
 
 # --- Diagnostic Block to Find Rare Classes ---
 print("\n--- Analyzing Class Distribution ---")

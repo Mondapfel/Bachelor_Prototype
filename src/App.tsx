@@ -33,7 +33,6 @@ function App() {
   // --- REFACTORED ADAPTATION LOGIC ---
   const applyMlAdaptation = useCallback(
     async (options?: { applyViewPrediction?: boolean }) => {
-      // Default to applying the view prediction unless explicitly told not to.
       const shouldApplyView = options?.applyViewPrediction ?? true;
 
       if (!tasks || tasks.length === 0) {
@@ -45,51 +44,59 @@ function App() {
         `ML Adaptation Mode: Fetching predictions... (Apply View: ${shouldApplyView})`
       );
 
+      // --- MODIFIED: Calculate all raw counts required by the model ---
       const now = new Date();
-      const number_of_tasks = tasks.length;
+      const openTasks = tasks.filter((t) => t.status !== "Erledigt");
 
-      const priorityCounts = tasks.reduce((acc, task) => {
-        acc[task.priority] = (acc[task.priority] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const num_critical_open = openTasks.filter(
+        (t) => t.priority === "Kritisch"
+      ).length;
+      const num_high_open = openTasks.filter(
+        (t) => t.priority === "Hoch"
+      ).length;
+      const num_medium_open = openTasks.filter(
+        (t) => t.priority === "Mittel"
+      ).length;
+      const num_low_open = openTasks.filter(
+        (t) => t.priority === "Niedrig"
+      ).length;
 
       const statusCounts = tasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
+      const num_pending = statusCounts["Start ausstehend"] || 0;
+      const num_todo = statusCounts["Zu Erledigen"] || 0;
+      const num_inprogress = statusCounts["In Bearbeitung"] || 0;
+      const num_done = statusCounts["Erledigt"] || 0;
+      const num_blocked = statusCounts["Blockiert"] || 0;
+
       const overdue_tasks = tasks.filter(
         (t) => t.status !== "Erledigt" && t.dueDate && new Date(t.dueDate) < now
       ).length;
 
-      const pct_overdue =
-        number_of_tasks > 0 ? overdue_tasks / number_of_tasks : 0;
       const due_today = tasks.filter(
         (t) =>
           t.dueDate && new Date(t.dueDate).toDateString() === now.toDateString()
       ).length;
-      const number_of_statuses_used = Object.keys(statusCounts).length;
 
+      // --- MODIFIED: This is the correct payload structure ---
       const featurePayload = {
-        number_of_tasks,
-        pct_critical_priority:
-          (priorityCounts["Kritisch"] || 0) / number_of_tasks,
-        pct_high_priority: (priorityCounts["Hoch"] || 0) / number_of_tasks,
-        pct_medium_priority: (priorityCounts["Mittel"] || 0) / number_of_tasks,
-        pct_low_priority: (priorityCounts["Niedrig"] || 0) / number_of_tasks,
-        pct_pending_status:
-          (statusCounts["Start ausstehend"] || 0) / number_of_tasks,
-        pct_todo_status: (statusCounts["Zu Erledigen"] || 0) / number_of_tasks,
-        pct_in_progress_status:
-          (statusCounts["In Bearbeitung"] || 0) / number_of_tasks,
-        pct_done_status: (statusCounts["Erledigt"] || 0) / number_of_tasks,
-        pct_blocked_status: (statusCounts["Blockiert"] || 0) / number_of_tasks,
+        number_of_tasks: tasks.length,
+        num_critical_open,
+        num_high_open,
+        num_medium_open,
+        num_low_open,
+        num_pending,
+        num_todo,
+        num_inprogress,
+        num_done,
+        num_blocked,
         overdue_tasks,
-        pct_overdue,
         due_today,
-        number_of_statuses_used,
-        time_of_day: 14,
-        sorted_by: "none",
+        time_of_day: now.getHours(), // Using real time instead of hardcoded value
+        sorted_by: "none", // This is still hardcoded and a limitation
         last_task_created_label: lastCreatedTask?.label || "none",
         last_task_created_priority: lastCreatedTask?.priority || "none",
         last_task_created_status: lastCreatedTask?.status || "none",
@@ -112,8 +119,6 @@ function App() {
           setView(prediction.predicted_view);
         }
 
-        // --- FIX: Apply filters based on the PREDICTION, not the current state ---
-        // This avoids the race condition.
         if (prediction.predicted_view === "list") {
           if (prediction.predicted_status_filter !== "none") {
             setCheckedStatus([prediction.predicted_status_filter] as any);
@@ -126,6 +131,10 @@ function App() {
           } else {
             setCheckedPriorities([]);
           }
+        } else {
+          // If the prediction is kanban, clear filters
+          setCheckedStatus([]);
+          setCheckedPriorities([]);
         }
       } catch (error) {
         console.error("Failed to fetch ML predictions:", error);
