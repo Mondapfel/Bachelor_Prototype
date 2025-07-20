@@ -4,14 +4,28 @@ import joblib
 import pandas as pd
 import os
 import json
-import numpy as np # NEW: Import numpy
-from scipy.stats import entropy # NEW: Import entropy
+import numpy as np
+from scipy.stats import entropy
 
 # --- Configuration ---
 app = Flask(__name__)
 CORS(app) 
 
 MODEL_DIR = "models"
+
+# NEW: Define the exact feature order the model was trained on.
+# This is the 'final_column_order' from your training script, minus the target variables.
+MODEL_FEATURE_ORDER = [
+    'number_of_tasks',
+    'overdue_tasks', 'pct_overdue', 'due_today', 'time_of_day',
+    'number_of_statuses_used', 'status_entropy', 'wip_load', 
+    'pct_critical_open', 'pct_high_open','pct_medium_open', 'pct_low_open', 
+    'pct_pending_status', 'pct_todo_status', 'pct_in_progress_status', 'pct_done_status', 'pct_blocked_status', 
+    'health_score', 'crisis_index', 'backlog_pressure', 
+    'sorted_by',
+    'last_task_created_label', 'last_task_created_priority', 'last_task_created_status', 'last_action_critical_bug'
+]
+
 
 # --- 1. Load the Trained Models on Startup ---
 print("Loading trained models...")
@@ -25,48 +39,37 @@ except FileNotFoundError as e:
     print(f"Details: {e}")
     exit()
 
-# NEW: This function replicates the feature engineering from your training data script.
-def engineer_features(df):
-    """Takes the raw input DataFrame and engineers all the features the model expects."""
-    # This logic is copied directly from your `validate_and_process_df` function
+def engineer_features(data):
+    """Takes the raw input dict and engineers all the features the model expects."""
+    # Create DataFrame from the input dictionary
+    df = pd.DataFrame(data, index=[0])
     
-    # --- Pillar 2: Advanced Feature Engineering ---
+    # --- Feature Engineering Logic (from before) ---
     num_tasks = df['number_of_tasks']
-    # Calculate num_open_tasks from the raw counts
     num_open_tasks = df['number_of_tasks'] - df['num_done']
     num_open_tasks_safe = num_open_tasks.replace(0, 1)
-
-    # Base Percentages for open tasks by priority
     df['pct_critical_open'] = (df['num_critical_open'] / num_open_tasks_safe).fillna(0)
     df['pct_high_open'] = (df['num_high_open'] / num_open_tasks_safe).fillna(0)
     df['pct_medium_open'] = (df['num_medium_open'] / num_open_tasks_safe).fillna(0)
     df['pct_low_open'] = (df['num_low_open'] / num_open_tasks_safe).fillna(0)
-
-    # Base Percentages for all tasks by status
     df['pct_pending_status'] = (df['num_pending'] / num_tasks).fillna(0)
     df['pct_todo_status'] = (df['num_todo'] / num_tasks).fillna(0)
     df['pct_in_progress_status'] = (df['num_inprogress'] / num_tasks).fillna(0)
     df['pct_done_status'] = (df['num_done'] / num_tasks).fillna(0)
     df['pct_blocked_status'] = (df['num_blocked'] / num_tasks).fillna(0)
     df['pct_overdue'] = (df['overdue_tasks'] / num_tasks).round(4).fillna(0)
-
-    # Interaction and Composite Features
     df['crisis_index'] = df['pct_overdue'] * df['pct_critical_open']
     df['backlog_pressure'] = df['pct_todo_status'] * df['pct_low_open']
     df['wip_load'] = (df['num_inprogress'] / num_open_tasks_safe).fillna(0)
     df['health_score'] = (0.5 * df['pct_overdue']) + (0.3 * df['pct_blocked_status']) + (0.2 * df['pct_critical_open'])
-    
-    # Structural Features
     status_counts_cols = ['num_pending', 'num_todo', 'num_inprogress', 'num_done', 'num_blocked']
     status_pct_cols = ['pct_pending_status', 'pct_todo_status', 'pct_in_progress_status', 'pct_done_status', 'pct_blocked_status']
     df['status_entropy'] = df[status_pct_cols].apply(lambda x: entropy(x[x>0]), axis=1).fillna(0)
     df['number_of_statuses_used'] = (df[status_counts_cols] > 0).sum(axis=1)
-
-    # Event-Based Features
     df['last_action_critical_bug'] = ((df['last_task_created_label'] == 'Bug') & (df['last_task_created_priority'] == 'Kritisch')).astype(int)
 
-    return df
-
+    # MODIFIED: Enforce the column order to match the training data
+    return df[MODEL_FEATURE_ORDER]
 
 # --- 2. The Prediction API Endpoint ---
 @app.route('/predict', methods=['POST'])
@@ -75,33 +78,40 @@ def predict():
     
     print("\n--- Received Raw Payload from Frontend ---")
     print(json.dumps(input_data, indent=2))
-    print("----------------------------------------\n")
     
     if not input_data:
         return jsonify({"error": "No input data provided"}), 400
 
     try:
-        input_df = pd.DataFrame(input_data, index=[0])
+        processed_df = engineer_features(input_data)
 
-        # MODIFIED: Perform feature engineering before prediction
-        processed_df = engineer_features(input_df)
+        # --- DECONSTRUCT THE PIPELINE FOR DEBUGGING ---
+        print("\n--- DEBUGGING model_view PIPELINE ---")
+        
+        # 1. Isolate the preprocessor and classifier steps
+        preprocessor = model_view.named_steps['preprocessor']
+        classifier = model_view.named_steps['classifier']
+        
+        # 2. Manually transform the data using the preprocessor
+        print("Data BEFORE preprocessing (shape, dtypes):\n", processed_df.shape)
+        print(processed_df.info()) # Check data types
+        
+        transformed_data = preprocessor.transform(processed_df)
+        
+        # 3. Inspect the data AFTER preprocessing
+        print("\nData AFTER preprocessing (shape, content):\n", transformed_data.shape)
+        print(transformed_data)
+        # --- END DEBUGGING BLOCK ---
 
-        print("\n--- Processed DataFrame with Engineered Features ---")
-        # Transpose for better readability in logs
-        print(processed_df.iloc[0].to_json(indent=2))
-        print("--------------------------------------------------\n")
-
-        # Make Predictions using the fully processed DataFrame
+        # Make Predictions using the other models as usual
         view_prediction = model_view.predict(processed_df)[0]
         status_prediction = model_status.predict(processed_df)[0]
         priority_prediction = model_priority.predict(processed_df)[0]
         
-        # Gated Logic: If the view is kanban, filters must be 'none'.
         if view_prediction == 'kanban':
             status_prediction = 'none'
             priority_prediction = 'none'
 
-        # Prepare the Response
         response = {
             'predicted_view': view_prediction,
             'predicted_status_filter': status_prediction,
@@ -115,7 +125,7 @@ def predict():
         print(f"Error Type: {type(e).__name__}")
         print(f"Error Details: {e}")
         import traceback
-        traceback.print_exc() # Print full traceback for easier debugging
+        traceback.print_exc()
         print("\nReceived data from frontend:")
         print(json.dumps(input_data, indent=2))
         print("-----------------------------\n")
