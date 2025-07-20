@@ -24,11 +24,6 @@ dist-ssr
 *.sw?
 
 .env
-training_data_llm_v2_validated.csv
-training_data_llm_v3_validated.csv
-training_data_llm_v4_validated.csv
-training_data_llm.csv
-1_training_data_llm_v4_validated.csv
-models/model_predicted_priority_filter.pkl
-models/model_predicted_status_filter.pkl
-models/model_predicted_view.pkl
+
+*.csv
+*.pkl

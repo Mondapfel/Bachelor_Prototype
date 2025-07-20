@@ -4,11 +4,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report # --- NEW: Import the report
 import joblib
 import os
 
 # --- Configuration ---
-INPUT_DATA_FILE = "training_data_llm_v4_validated.csv" # Make sure this matches your latest file
+INPUT_DATA_FILE = "training_data_llm_v6_validated_corrected.csv"
 MODEL_OUTPUT_DIR = "models"
 if not os.path.exists(MODEL_OUTPUT_DIR):
     os.makedirs(MODEL_OUTPUT_DIR)
@@ -22,16 +23,12 @@ except FileNotFoundError:
     print(f"ERROR: The file '{INPUT_DATA_FILE}' was not found. Please make sure it's in the same directory.")
     exit()
 
-# --- NEW: Diagnostic Block to Find Rare Classes ---
+# --- Diagnostic Block to Find Rare Classes ---
 print("\n--- Analyzing Class Distribution ---")
-# Loop through each of the columns we want to predict
 for col in ['predicted_view', 'predicted_status_filter', 'predicted_priority_filter']:
     print(f"\nValue counts for '{col}':")
-    # .value_counts() is a pandas function that counts occurrences of each unique value
     print(df[col].value_counts())
 print("------------------------------------\n")
-# --- End of Diagnostic Block ---
-
 
 # --- 2. Define Features and Labels ---
 TARGET_COLUMNS = ['predicted_view', 'predicted_status_filter', 'predicted_priority_filter']
@@ -56,48 +53,50 @@ preprocessor = ColumnTransformer(
 # --- 4. Train a Model for Each Target ---
 def train_and_save_model(target_name):
     """
-    Trains a Random Forest model for a specific target label and saves it.
+    Trains a Random Forest model, prints a detailed report, and saves the model.
     """
     print(f"\n--- Training model for: {target_name} ---")
-    
+
     model_pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
         ('classifier', RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced'))
     ])
-    
+
     y_target = y[target_name]
-    
-    # --- FIX: Check for rare classes before attempting to stratify ---
+
+    # Check for rare classes before attempting to stratify
     class_counts = y_target.value_counts()
-    
-    if class_counts.min() < 2:
-        print(f"Warning: The least populated class for '{target_name}' has only 1 member. Disabling stratification for this model.")
-        stratify_option = None # Disable stratification
-    else:
-        stratify_option = y_target # Enable stratification
-        
+    stratify_option = y_target if class_counts.min() >= 2 else None
+    if stratify_option is None:
+        print(f"Warning: The least populated class for '{target_name}' has only 1 member. Disabling stratification.")
+
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y_target, 
-        test_size=0.2, 
-        random_state=42, 
+        X, y_target,
+        test_size=0.2,
+        random_state=42,
         stratify=stratify_option
     )
-    
+
     print("Training model...")
     model_pipeline.fit(X_train, y_train)
+
+    # --- NEW: Generate predictions and print the detailed classification report ---
+    y_pred = model_pipeline.predict(X_test)
     
-    accuracy = model_pipeline.score(X_test, y_test)
-    print(f"Model accuracy on test data: {accuracy:.4f}")
-    
+    print("\nClassification Report:")
+    # Use zero_division=0 to prevent warnings for classes with no predicted samples
+    report = classification_report(y_test, y_pred, zero_division=0)
+    print(report)
+    # --- END OF NEW CODE ---
+
     model_path = os.path.join(MODEL_OUTPUT_DIR, f"model_{target_name}.pkl")
     joblib.dump(model_pipeline, model_path)
-    print(f"Model saved to '{model_path}'")
+    print(f"\nModel saved to '{model_path}'")
 
 # --- Main Execution ---
 if __name__ == "__main__":
     for target in TARGET_COLUMNS:
         train_and_save_model(target)
-        
+
     print("\nAll models have been trained and saved successfully.")
     print(f"You can find your trained models in the '{MODEL_OUTPUT_DIR}/' directory.")
-
