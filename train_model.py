@@ -4,12 +4,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report # --- NEW: Import the report
+from sklearn.metrics import classification_report
 import joblib
 import os
 
 # --- Configuration ---
-# INPUT_DATA_FILE = "training_data_llm_v7_enhanced.csv"
 MODEL_OUTPUT_DIR = "models"
 if not os.path.exists(MODEL_OUTPUT_DIR):
     os.makedirs(MODEL_OUTPUT_DIR)
@@ -23,6 +22,9 @@ try:
     df_clean = pd.read_csv(CLEAN_DATA_FILE)
     df_noisy = pd.read_csv(NOISY_DATA_FILE)
     
+    df_noisy_sample = df_noisy.sample(n=100, random_state=42)
+    df_clean_sample = df_clean.sample(n=200, random_state=42)
+
     # Combine the two datasets
     df_combined = pd.concat([df_clean, df_noisy], ignore_index=True)
 
@@ -34,17 +36,6 @@ except FileNotFoundError as e:
     print(f"ERROR: Could not find a data file: {e}")
     exit()
 
-"""
-# --- 1. Load the Dataset ---
-print(f"Loading dataset from '{INPUT_DATA_FILE}'...")
-try:
-    df = pd.read_csv(INPUT_DATA_FILE)
-    print(f"Dataset loaded successfully with {len(df)} rows.")
-except FileNotFoundError:
-    print(f"ERROR: The file '{INPUT_DATA_FILE}' was not found. Please make sure it's in the same directory.")
-    exit()
-"""
-
 # --- Diagnostic Block to Find Rare Classes ---
 print("\n--- Analyzing Class Distribution ---")
 for col in ['predicted_view', 'predicted_status_filter', 'predicted_priority_filter']:
@@ -54,17 +45,59 @@ print("------------------------------------\n")
 
 # --- 2. Define Features and Labels ---
 TARGET_COLUMNS = ['predicted_view', 'predicted_status_filter', 'predicted_priority_filter']
-FEATURES = [col for col in df.columns if col not in TARGET_COLUMNS]
+
+# --- MODIFIED: This list now reflects the actual columns in your final CSV files. ---
+# To easily add or remove features, comment or uncomment lines in this list.
+FEATURES_TO_USE = [
+    'number_of_tasks',
+    'overdue_tasks',
+    'pct_overdue',
+    'due_today',
+    #'time_of_day',
+    #'number_of_statuses_used',
+    #'status_entropy',
+    #'wip_load',
+    'pct_critical_open',
+    'pct_high_open',
+    'pct_medium_open',
+    'pct_low_open',
+    'pct_pending_status',
+    'pct_todo_status',
+    'pct_in_progress_status',
+    'pct_done_status',
+    'pct_blocked_status',
+    #'health_score',
+    #'crisis_index',
+    #'backlog_pressure',
+    'sorted_by',
+    #'last_task_created_label',
+    #'last_task_created_priority',
+    #'last_task_created_status',
+    #'last_action_critical_bug'
+]
+
+# Filter the list to only include columns that actually exist in the loaded DataFrame
+FEATURES = [f for f in FEATURES_TO_USE if f in df.columns]
+print(f"Using the following {len(FEATURES)} features for training: {FEATURES}")
+
 
 X = df[FEATURES]
 y = df[TARGET_COLUMNS]
 
 # --- 3. Preprocessing ---
-categorical_features = [
+# Define all possible categorical features
+all_categorical_features = [
     'sorted_by', 'last_task_created_label',
     'last_task_created_priority', 'last_task_created_status'
 ]
+
+# Filter the list to only include categorical features that are in our final FEATURES list
+categorical_features = [f for f in all_categorical_features if f in FEATURES]
 numerical_features = [col for col in FEATURES if col not in categorical_features]
+
+print(f"Identified {len(numerical_features)} numerical features.")
+print(f"Identified {len(categorical_features)} categorical features: {categorical_features}")
+
 
 preprocessor = ColumnTransformer(
     transformers=[
@@ -81,7 +114,7 @@ def train_and_save_model(target_name):
 
     model_pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
-        ('classifier', RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced'))
+        ('classifier', RandomForestClassifier(n_estimators=200, random_state=42, max_depth=15, max_features=12))
     ])
 
     y_target = y[target_name]
@@ -102,15 +135,12 @@ def train_and_save_model(target_name):
     print("Training model...")
     model_pipeline.fit(X_train, y_train)
 
-    # --- NEW: Generate predictions and print the detailed classification report ---
     y_pred = model_pipeline.predict(X_test)
     
     print("\nClassification Report:")
-    # Use zero_division=0 to prevent warnings for classes with no predicted samples
     report = classification_report(y_test, y_pred, zero_division=0)
     print(report)
-    # --- END OF NEW CODE ---
-
+    
     model_path = os.path.join(MODEL_OUTPUT_DIR, f"model_{target_name}.pkl")
     joblib.dump(model_pipeline, model_path)
     print(f"\nModel saved to '{model_path}'")
