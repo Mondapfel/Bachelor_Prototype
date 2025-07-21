@@ -6,4 +6,4 @@ export const AdaptationModes = {
 };
 
 // Adaption Mode switch
-export const CURRENT_ADAPTATION_MODE: AdaptationMode = AdaptationModes.AI;
+export const CURRENT_ADAPTATION_MODE: AdaptationMode = AdaptationModes.RULE_BASED;

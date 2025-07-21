@@ -7,8 +7,9 @@ import { AdaptationModes, CURRENT_ADAPTATION_MODE } from "./lib/adaptionConfig";
 import { useTasksDataStore } from "./hooks/useTasksDataStore";
 import { useCheckedPrioritiesStore } from "./hooks/useCheckedPrioritiesStore";
 import { useCheckedStatusStore } from "./hooks/useCheckedStatusStore";
+import { getAdaptationDecision } from "./lib/ruleEngine";
+import type { Priority, Status } from "./data/TasksData";
 
-// This is a new type definition for the response from our Python backend
 type PredictionResponse = {
   predicted_view: "kanban" | "list";
   predicted_status_filter: string;
@@ -17,36 +18,58 @@ type PredictionResponse = {
 
 function App() {
   const [view, setView] = useState<"kanban" | "list">("list");
-  const { tasks, fetchTasks, lastCreatedTask } = useTasksDataStore();
+  const { tasks, fetchTasks, lastModifiedTaskId } = useTasksDataStore();
   const { setCheckedPriorities } = useCheckedPrioritiesStore();
   const { setCheckedStatus } = useCheckedStatusStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const isInitialLoad = useRef(true);
-  const lastAdaptedTaskRef = useRef<string | null>(null);
 
   // Effect to fetch initial task data when the component mounts
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // --- REFACTORED ADAPTATION LOGIC ---
+  // --- ADAPTATION FUNCTIONS ---
+
+  const applyRuleBasedAdaptation = useCallback(() => {
+    const currentTasks = useTasksDataStore.getState().tasks;
+    if (!currentTasks) return;
+
+    console.log("Applying rule-based adaptation...");
+    const decision = getAdaptationDecision(currentTasks);
+
+    setView(decision.view);
+
+    if (decision.view === "list") {
+      setCheckedStatus(decision.statusFilter as Status[]);
+      setCheckedPriorities(decision.priorityFilter as Priority[]);
+    } else {
+      setCheckedStatus([]);
+      setCheckedPriorities([]);
+    }
+
+    setIsLoading(false);
+  }, [setCheckedStatus, setCheckedPriorities]);
+
   const applyMlAdaptation = useCallback(
     async (options?: { applyViewPrediction?: boolean }) => {
-      const shouldApplyView = options?.applyViewPrediction ?? true;
-
-      if (!tasks || tasks.length === 0) {
+      const { tasks: currentTasks, lastCreatedTask: currentLastCreatedTask } =
+        useTasksDataStore.getState();
+      if (!currentTasks || currentTasks.length === 0) {
         setIsLoading(false);
         return;
       }
+
+      const shouldApplyView = options?.applyViewPrediction ?? true;
 
       console.log(
         `ML Adaptation Mode: Fetching predictions... (Apply View: ${shouldApplyView})`
       );
 
-      // --- MODIFIED: Calculate all raw counts required by the model ---
+      // --- Calculate all raw counts required by the model ---
       const now = new Date();
-      const openTasks = tasks.filter((t) => t.status !== "Erledigt");
+      const openTasks = currentTasks.filter((t) => t.status !== "Erledigt");
 
       const num_critical_open = openTasks.filter(
         (t) => t.priority === "Kritisch"
@@ -61,7 +84,7 @@ function App() {
         (t) => t.priority === "Niedrig"
       ).length;
 
-      const statusCounts = tasks.reduce((acc, task) => {
+      const statusCounts = currentTasks.reduce((acc, task) => {
         acc[task.status] = (acc[task.status] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
@@ -72,18 +95,18 @@ function App() {
       const num_done = statusCounts["Erledigt"] || 0;
       const num_blocked = statusCounts["Blockiert"] || 0;
 
-      const overdue_tasks = tasks.filter(
+      const overdue_tasks = currentTasks.filter(
         (t) => t.status !== "Erledigt" && t.dueDate && new Date(t.dueDate) < now
       ).length;
 
-      const due_today = tasks.filter(
+      const due_today = currentTasks.filter(
         (t) =>
           t.dueDate && new Date(t.dueDate).toDateString() === now.toDateString()
       ).length;
 
-      // --- MODIFIED: This is the correct payload structure ---
+      // --- Payload structure ---
       const featurePayload = {
-        number_of_tasks: tasks.length,
+        number_of_tasks: currentTasks.length,
         num_critical_open,
         num_high_open,
         num_medium_open,
@@ -95,11 +118,11 @@ function App() {
         num_blocked,
         overdue_tasks,
         due_today,
-        time_of_day: now.getHours(), // Using real time instead of hardcoded value
-        sorted_by: "none", // This is still hardcoded and a limitation
-        last_task_created_label: lastCreatedTask?.label || "none",
-        last_task_created_priority: lastCreatedTask?.priority || "none",
-        last_task_created_status: lastCreatedTask?.status || "none",
+        time_of_day: now.getHours(),
+        sorted_by: "none",
+        last_task_created_label: currentLastCreatedTask?.label || "none",
+        last_task_created_priority: currentLastCreatedTask?.priority || "none",
+        last_task_created_status: currentLastCreatedTask?.status || "none",
       };
 
       try {
@@ -132,7 +155,6 @@ function App() {
             setCheckedPriorities([]);
           }
         } else {
-          // If the prediction is kanban, clear filters
           setCheckedStatus([]);
           setCheckedPriorities([]);
         }
@@ -142,47 +164,50 @@ function App() {
         setIsLoading(false);
       }
     },
-    [tasks, lastCreatedTask, setCheckedStatus, setCheckedPriorities]
+    [setCheckedStatus, setCheckedPriorities]
   );
 
-  // Effect for initial load and new task creation
+  // --- EFFECT 1: Handle Initial Load ---
+  // This effect runs only once when tasks are first successfully fetched.
   useEffect(() => {
-    if (CURRENT_ADAPTATION_MODE !== AdaptationModes.AI || !tasks) {
-      setIsLoading(false);
+    if (tasks && tasks.length > 0 && isInitialLoad.current) {
+      console.log("Initial load: Triggering adaptation.");
+      if (CURRENT_ADAPTATION_MODE === AdaptationModes.RULE_BASED) {
+        applyRuleBasedAdaptation();
+      } else if (CURRENT_ADAPTATION_MODE === AdaptationModes.AI) {
+        applyMlAdaptation({ applyViewPrediction: true });
+      }
+      isInitialLoad.current = false;
+    }
+  }, [tasks, applyRuleBasedAdaptation, applyMlAdaptation]);
+
+  // --- EFFECT 2: Handle Subsequent Significant Changes ---
+  // This effect now safely runs ONLY when lastModifiedTaskId changes.
+  useEffect(() => {
+    if (isInitialLoad.current || !lastModifiedTaskId) {
       return;
     }
 
-    const isNewTaskEvent =
-      lastCreatedTask && lastCreatedTask.taskId !== lastAdaptedTaskRef.current;
-
-    if (isInitialLoad.current || isNewTaskEvent) {
+    console.log("Significant task modification: Triggering adaptation.");
+    if (CURRENT_ADAPTATION_MODE === AdaptationModes.RULE_BASED) {
+      applyRuleBasedAdaptation();
+    } else if (CURRENT_ADAPTATION_MODE === AdaptationModes.AI) {
       applyMlAdaptation({ applyViewPrediction: true });
-      isInitialLoad.current = false;
-      if (isNewTaskEvent) {
-        lastAdaptedTaskRef.current = lastCreatedTask.taskId;
-      }
     }
-  }, [tasks, lastCreatedTask, applyMlAdaptation]);
+  }, [lastModifiedTaskId, applyRuleBasedAdaptation, applyMlAdaptation]);
 
-  // --- NEW: Handler for manual view changes ---
+  // Handle manual view changes to override automatic adaptations
   const handleViewChange = (newView: "kanban" | "list") => {
-    // Update the view immediately for a responsive feel
     setView(newView);
-
-    // If the user switches to the list view, trigger a filter-only adaptation
-    if (newView === "list" && CURRENT_ADAPTATION_MODE === AdaptationModes.AI) {
-      applyMlAdaptation({ applyViewPrediction: false });
-    } else {
-      // If switching to Kanban, always clear filters
-      setCheckedStatus([]);
-      setCheckedPriorities([]);
-    }
+    setCheckedStatus([]);
+    setCheckedPriorities([]);
   };
 
   if (isLoading && isInitialLoad.current) {
     return (
       <div className="flex items-center justify-center h-screen bg-background text-foreground">
         <div className="flex flex-col items-center gap-2">
+          {/* Loading SVG */}
           <svg
             className="animate-spin h-8 w-8 text-primary"
             xmlns="http://www.w3.org/2000/svg"
@@ -203,9 +228,7 @@ function App() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <p className="text-muted-foreground">
-            Intelligente Ansicht wird geladen...
-          </p>
+          <p className="text-muted-foreground">Ansicht wird optimiert</p>
         </div>
       </div>
     );
@@ -213,7 +236,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-blue-100 dark:bg-blue-950 text-gray-900 dark:text-white">
-      {/* Pass the new handler to the Header */}
       <Header view={view} setView={handleViewChange} />
       <main className="px-12 py-6">
         {view === "kanban" ? <KanbanView /> : <ListView />}

@@ -224,6 +224,7 @@ const getFieldsByAI = async (
   return null; // Return null if anything fails
 };
 
+// --- Adaptation Controller Component ---
 function AdaptationController({ isEditing }: { isEditing: boolean }) {
   const { control, setValue, getValues } = useFormContext<taskFormData>();
   const title = useWatch({ control, name: "title" });
@@ -233,7 +234,6 @@ function AdaptationController({ isEditing }: { isEditing: boolean }) {
       if (isEditing || title.length < 5) return;
 
       let predictedFields: Partial<taskFormData> | null = null;
-
       if (CURRENT_ADAPTATION_MODE === AdaptationModes.RULE_BASED) {
         predictedFields = getFieldsByRule(title);
       } else if (CURRENT_ADAPTATION_MODE === AdaptationModes.AI) {
@@ -260,8 +260,10 @@ function AdaptationController({ isEditing }: { isEditing: boolean }) {
   return null;
 }
 
+// --- Main Task Dialog Component ---
 export default function TaskDialog() {
-  const { addTask, selectedTask, setSelectedTask, updateTasks, tasks } =
+  // Destructure the new `updateSingleTask` function
+  const { addTask, selectedTask, setSelectedTask, updateSingleTask } =
     useTasksDataStore();
 
   const methods = useForm<taskFormData>({
@@ -270,12 +272,11 @@ export default function TaskDialog() {
       title: "",
       priority: "Mittel",
       label: "Feature",
-      status: "Start ausstehend",
+      status: "Zu Erledigen",
     },
   });
 
   const { handleSubmit, reset, setValue } = methods;
-
   const { isOpen, setIsOpen } = useOpenDialogStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -292,6 +293,7 @@ export default function TaskDialog() {
   const onSubmit = async (data: taskFormData) => {
     setIsLoading(true);
 
+    // --- ADDING a new task ---
     if (!selectedTask) {
       const newTask: Task = {
         taskId: `Task-${generateRandomThreeDigitNumber()}`,
@@ -306,49 +308,46 @@ export default function TaskDialog() {
 
       try {
         const result = await addTask(newTask);
-        toast[result ? "success" : "error"](
-          result
+        // Use the custom toast message but with the correct success check
+        toast[result.success ? "success" : "error"](
+          result.success
             ? `Die Aufgabe [${newTask.taskId}] wurde erfolgreich hinzugefügt!`
             : `Aufgabe hinzufügen fehlgeschlagen`
         );
-
-        reset();
-        setIsOpen(false);
       } catch (error) {
         console.log(error);
         toast.error("Aufgabe hinzufügen fehlgeschlagen");
-      } finally {
-        setIsLoading(false);
       }
-    } else {
-      const updateTasksArray = tasks?.map((t) => {
-        if (t.taskId === selectedTask.taskId) {
-          return {
-            ...t,
-            title: data.title,
-            label: data.label,
-            priority: data.priority,
-            status: data.status,
-            dueDate: data.dueDate,
-          };
-        }
-        return t;
-      });
 
-      if (updateTasksArray) {
-        const result = await updateTasks(updateTasksArray, "copy");
-        toast[result ? "success" : "error"](
-          result
+      // --- EDITING an existing task ---
+    } else {
+      try {
+        // Use the new, cleaner updateSingleTask function
+        const result = await updateSingleTask(selectedTask.taskId, {
+          title: data.title,
+          status: data.status,
+          priority: data.priority,
+          label: data.label,
+          dueDate: data.dueDate,
+        });
+
+        // Keep the existing toast message logic for consistency
+        toast[result.success ? "success" : "error"](
+          result.success
             ? `Die Aufgabe [${selectedTask.taskId}] wurde erfolgreich aktualisiert!`
             : `Aufgabe aktualisieren fehlgeschlagen`
         );
+      } catch (error) {
+        console.log(error);
+        toast.error("Aufgabe aktualisieren fehlgeschlagen");
       }
-      reset();
-      setSelectedTask(null);
-
-      setIsLoading(false);
-      setIsOpen(false);
     }
+
+    // Reset and close the dialog
+    setIsLoading(false);
+    setIsOpen(false);
+    setSelectedTask(null);
+    reset();
   };
 
   return (
