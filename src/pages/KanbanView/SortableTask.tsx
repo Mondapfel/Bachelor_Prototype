@@ -17,7 +17,7 @@ import {
   ChevronsLeftRightEllipsis,
   CalendarDays,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { TaskDropDown } from "@/components/DropDowns/TasksDropDown/tasksDropDown";
 
 interface SortableTaskProps {

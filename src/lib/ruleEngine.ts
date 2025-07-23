@@ -33,9 +33,6 @@ export const getAdaptationDecision = (tasks: Task[]): AdaptationDecision => {
   const overdueTasks = openTasks.filter(
     (task) => task.dueDate && new Date(task.dueDate) < now
   );
-  const inProgressTasks = openTasks.filter(
-    (task) => task.status === "In Bearbeitung"
-  );
   const blockedTasks = openTasks.filter((task) => task.status === "Blockiert");
   const backlogTasks = openTasks.filter((task) => task.status === 'Zu Erledigen' || task.status === 'Start ausstehend');
   const dueTodayTasks = openTasks.filter((task) => task.dueDate && new Date(task.dueDate).toDateString() === now.toDateString());

@@ -362,7 +362,7 @@ export default function TaskDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button className="bg-blue-400 dark:bg-blue-800 dark:text-white rounded dark:hover:bg-gray-400 rounded-md">
+        <Button className="bg-blue-400 dark:bg-blue-800 dark:text-white dark:hover:bg-gray-400 rounded-md">
           Neue Aufgabe hinzufügen
         </Button>
       </DialogTrigger>
