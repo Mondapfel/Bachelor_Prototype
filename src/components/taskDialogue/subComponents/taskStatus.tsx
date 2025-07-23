@@ -28,8 +28,8 @@ const statuses: Status[] = [
   { value: "Start ausstehend", icon: CircleDashed },
   { value: "Zu Erledigen", icon: Circle },
   { value: "In Bearbeitung", icon: CircleFadingArrowUp },
-  { value: "Erledigt", icon: CircleCheckBig },
   { value: "Blockiert", icon: CircleOff },
+  { value: "Erledigt", icon: CircleCheckBig },
 ];
 
 export default function TaskStatus() {

@@ -59,15 +59,15 @@ const statusesArray: SingleStatusItem[] = [
     count: 0,
   },
   {
-    value: "erledigt",
-    label: "Erledigt",
-    icon: CircleCheckBig,
-    count: 0,
-  },
-  {
     value: "blockiert",
     label: "Blockiert",
     icon: CircleOff,
+    count: 0,
+  },
+  {
+    value: "erledigt",
+    label: "Erledigt",
+    icon: CircleCheckBig,
     count: 0,
   },
 ];
@@ -83,8 +83,8 @@ export function StatusDropDown() {
       "Start ausstehend",
       "Zu Erledigen",
       "In Bearbeitung",
-      "Erledigt",
       "Blockiert",
+      "Erledigt",
     ];
 
     if (!validStatuses.includes(label as Status)) {
@@ -126,15 +126,16 @@ export function StatusDropDown() {
             count: tasks.filter((task) => task.status === "In Bearbeitung")
               .length,
           };
-        case "erledigt":
-          return {
-            ...status,
-            count: tasks.filter((task) => task.status === "Erledigt").length,
-          };
+
         case "blockiert":
           return {
             ...status,
             count: tasks.filter((task) => task.status === "Blockiert").length,
+          };
+        case "erledigt":
+          return {
+            ...status,
+            count: tasks.filter((task) => task.status === "Erledigt").length,
           };
 
         default:

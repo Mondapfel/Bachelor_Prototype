@@ -109,11 +109,11 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       {...listeners}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="p-4 mb-2 touch-none dark:bg-slate-800/50 cursor-grab min-h-[230px] flex flex-col justify-between"
+      className="p-3 mb-2 touch-none dark:bg-slate-800/50 cursor-grab flex flex-col justify-start gap-y-4"
     >
       <CardHeader className="p-0">
         <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-sm font-bold line-clamp-2 min-h-[40px]">
+          <CardTitle className="text-sm font-bold line-clamp-2">
             {task.title}
           </CardTitle>
           {task.isFavorite && (

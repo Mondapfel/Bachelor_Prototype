@@ -75,7 +75,7 @@ const TaskPlaceholder = ({ task }: TaskPlaceholderProps) => {
   const customLabelStyle = getLabelStyling(task.label);
 
   return (
-    <Card className="p-4 mb-2 touch-none opacity-40 dark:bg-slate-800/50 min-h-[230px] flex flex-col justify-between">
+    <Card className="p-3 mb-2 touch-none opacity-40 dark:bg-slate-800/50 flex flex-col justify-start gap-y-4">
       <CardHeader className="p-0">
         <div className="flex justify-between items-start gap-2">
           <CardTitle className="text-sm font-bold line-clamp-2">
@@ -87,7 +87,7 @@ const TaskPlaceholder = ({ task }: TaskPlaceholderProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 mt-4">
+      <CardContent className="p-0 mt-2">
         <div className="flex items-center space-x-2">
           {task.label && (
             <Badge variant="outline" className={customLabelStyle}>
@@ -104,7 +104,7 @@ const TaskPlaceholder = ({ task }: TaskPlaceholderProps) => {
         </div>
       </CardContent>
 
-      <CardFooter className="p-0 mt-4 flex justify-between items-center">
+      <CardFooter className="p-0 mt-2 flex justify-between items-center">
         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
           <CalendarDays size={16} className="mr-2" />
           <span>{formatDate(task.dueDate)}</span>
