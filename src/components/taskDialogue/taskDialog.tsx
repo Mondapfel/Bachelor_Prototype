@@ -194,7 +194,7 @@ const getFieldsByAI = async (
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" }, // Enforce JSON output
     });
@@ -272,7 +272,7 @@ export default function TaskDialog() {
       title: "",
       priority: "Mittel",
       label: "Feature",
-      status: "Zu Erledigen",
+      status: "Start ausstehend",
     },
   });
 

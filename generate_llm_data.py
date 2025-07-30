@@ -91,7 +91,7 @@ number_of_tasks,num_critical_open,num_high_open,num_medium_open,num_low_open,num
 - **7. The Kick-off Manager:** High `num_pending`, low `number_of_tasks` (<15), zero `num_done`. -> `predicted_view`='list', `predicted_status_filter`='Start ausstehend', `predicted_priority_filter`='none'.
 - **8. The Backlog Groomer:** High `num_low_open`, `last_task_created_priority` is 'Niedrig'. -> `predicted_view`='list', `predicted_status_filter`='none', `predicted_priority_filter`='Niedrig'.
 - **9. The Structured Planner:** Healthy project (low overdue/blocked, high done). -> `predicted_view`='list', filters are 'none'.
-- **10. The Ambiguous Manager (NEW):** A project with mixed signals that doesn't clearly fit other personas (e.g., moderate overdue tasks but no dominant priority). -> `predicted_view`='list', filters are 'none' due to ambiguity.
+- **10. The Ambiguous Manager:** A project with mixed signals that doesn't clearly fit other personas (e.g., moderate overdue tasks but no dominant priority). -> `predicted_view`='list', filters are 'none' due to ambiguity.
 
 --- EXAMPLE 1 ---
 Reasoning Step 1: Persona Selection. I will generate a row for the 'Crisis Manager: Major Fire' persona.
