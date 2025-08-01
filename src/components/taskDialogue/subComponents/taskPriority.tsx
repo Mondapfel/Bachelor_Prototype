@@ -31,7 +31,10 @@ const statuses: Priority[] = [
 ];
 
 export default function TaskPriority() {
-  const { control } = useFormContext<taskFormData>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<taskFormData>();
   return (
     <div className="flex flex-col gap-2">
       <Label className="opacity-75 text-sm font-medium">Priorität</Label>
@@ -65,6 +68,9 @@ export default function TaskPriority() {
           );
         }}
       />
+      {errors.priority && (
+        <p className="text-red-500 text-sm">{errors.priority.message}</p>
+      )}
     </div>
   );
 }

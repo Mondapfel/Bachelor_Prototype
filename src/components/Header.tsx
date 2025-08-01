@@ -27,17 +27,16 @@ const Header: React.FC<Props> = ({ view, setView }) => {
   return (
     <div className="flex justify-between items-center px-6 py-4 bg-white dark:bg-slate-950 shadow">
       <h1 className="text-2xl font-bold">Tasky</h1>
+      <Button
+        className="opacity-0.5"
+        variant="outline"
+        size="icon"
+        onClick={handleReset}
+        title="Reset Board"
+      >
+        <RotateCcw className="h-5 w-5" />
+      </Button>
       <div className="flex items-center gap-4">
-        {/* --- Reset Button --- */}
-        <Button
-          className="opacity-0"
-          variant="outline"
-          size="icon"
-          onClick={handleReset}
-          title="Reset Board"
-        >
-          <RotateCcw className="h-5 w-5" />
-        </Button>
         <div className="flex items-center bg-gray-200 dark:bg-gray-700 rounded-md p-1">
           <Button
             variant="ghost"
@@ -68,7 +67,12 @@ const Header: React.FC<Props> = ({ view, setView }) => {
         </div>
 
         {/* --- Theme Toggle Button --- */}
-        <Button className="rounded-md" variant="outline" size="icon" onClick={toggleTheme}>
+        <Button
+          className="rounded-md"
+          variant="outline"
+          size="icon"
+          onClick={toggleTheme}
+        >
           {document.documentElement.classList.contains("dark") ? (
             <Sun className="h-5 w-5" />
           ) : (

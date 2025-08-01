@@ -26,7 +26,12 @@ import {
 import { useOpenDialogStore } from "@/hooks/useOpenDialogStore";
 import { useEffect, useState } from "react";
 import { useTasksDataStore } from "@/hooks/useTasksDataStore";
-import { type Task } from "@/data/TasksData";
+import {
+  type Task,
+  type Status,
+  type Priority,
+  type Label,
+} from "@/data/TasksData";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdaptationModes, CURRENT_ADAPTATION_MODE } from "@/lib/adaptionConfig";
@@ -270,9 +275,10 @@ export default function TaskDialog() {
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
-      priority: "Mittel",
-      label: "Feature",
-      status: "Start ausstehend",
+      status: "",
+      priority: "",
+      label: "",
+      dueDate: null,
     },
   });
 
@@ -293,57 +299,46 @@ export default function TaskDialog() {
   const onSubmit = async (data: taskFormData) => {
     setIsLoading(true);
 
-    // --- ADDING a new task ---
+    // FIX: This is safe because the schema's `.refine` checks ensure these values are not empty or null.
+    const finalData = {
+      title: data.title,
+      status: data.status as Status,
+      priority: data.priority as Priority,
+      label: data.label as Label,
+      dueDate: data.dueDate as Date, // Cast to Date, as it can't be null here
+    };
+
     if (!selectedTask) {
+      // --- ADDING a new task ---
       const newTask: Task = {
+        ...finalData,
         taskId: `Task-${generateRandomThreeDigitNumber()}`,
-        title: data.title,
-        status: data.status,
-        priority: data.priority,
-        label: data.label,
-        dueDate: data.dueDate,
         isFavorite: false,
         createdAt: new Date(),
       };
-
       try {
         const result = await addTask(newTask);
-        // Use the custom toast message but with the correct success check
         toast[result.success ? "success" : "error"](
           result.success
             ? `Die Aufgabe [${newTask.taskId}] wurde erfolgreich hinzugefügt!`
             : `Aufgabe hinzufügen fehlgeschlagen`
         );
       } catch (error) {
-        console.log(error);
         toast.error("Aufgabe hinzufügen fehlgeschlagen");
       }
-
-      // --- EDITING an existing task ---
     } else {
+      // --- EDITING an existing task ---
       try {
-        // Use the new, cleaner updateSingleTask function
-        const result = await updateSingleTask(selectedTask.taskId, {
-          title: data.title,
-          status: data.status,
-          priority: data.priority,
-          label: data.label,
-          dueDate: data.dueDate,
-        });
-
-        // Keep the existing toast message logic for consistency
+        const result = await updateSingleTask(selectedTask.taskId, finalData);
         toast[result.success ? "success" : "error"](
           result.success
             ? `Die Aufgabe [${selectedTask.taskId}] wurde erfolgreich aktualisiert!`
             : `Aufgabe aktualisieren fehlgeschlagen`
         );
       } catch (error) {
-        console.log(error);
         toast.error("Aufgabe aktualisieren fehlgeschlagen");
       }
     }
-
-    // Reset and close the dialog
     setIsLoading(false);
     setIsOpen(false);
     setSelectedTask(null);

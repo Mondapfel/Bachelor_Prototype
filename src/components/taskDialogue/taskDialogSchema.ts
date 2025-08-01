@@ -1,32 +1,44 @@
 import { z } from "zod";
 
-export type Label = "Bug" | "Feature" | "Dokumentation";
-export type Priority = "Niedrig" | "Mittel" | "Hoch" | "Kritisch";
+// These arrays are the single source of truth for the dropdown values.
+export const labels = ["Bug", "Feature", "Dokumentation"] as const;
+export const priorities = ["Niedrig", "Mittel", "Hoch", "Kritisch"] as const;
+export const statuses = ["Start ausstehend", "Zu Erledigen", "In Bearbeitung", "Erledigt", "Blockiert"] as const;
 
 export const taskFormSchema = z.object({
   title: z
     .string()
-    .min(1, { message: "Tifel fehlt!" })
+    .min(1, { message: "Titel fehlt!" })
     .max(100, { message: "Titel darf maximal 100 Zeichen lang sein." }),
 
-  status: z.enum(
-    ["Start ausstehend", "Zu Erledigen", "In Bearbeitung", "Erledigt", "Blockiert"],
-    {
-      required_error: "Status fehlt!",
-    }
-  ),
+  // Allows an empty string for the placeholder, but requires a valid status on submit.
+  status: z.enum(statuses, { required_error: "Status fehlt!" }).or(z.literal("")),
 
-  priority: z.enum(["Niedrig", "Mittel", "Hoch", "Kritisch"], {
-    required_error: "Priorität fehlt!",
-  }),
+  // Allows an empty string for the placeholder, but requires a valid priority on submit.
+  priority: z.enum(priorities, { required_error: "Priorität fehlt!" }).or(z.literal("")),
+    
+  // Allows an empty string for the placeholder, but requires a valid label on submit.
+  label: z.enum(labels, { required_error: "Label fehlt!" }).or(z.literal("")),
 
-  label: z.enum(["Bug", "Feature", "Dokumentation"], {
-    required_error: "Label fehlt!",
-  }),
-
-  dueDate: z.date({
-    required_error: "Fälligkeitsdatum fehlt!",
-  }),
+  // Allows the date to be null initially, but requires a valid date on submit.
+  dueDate: z.date({ required_error: "Fälligkeitsdatum fehlt!" }).nullable(),
+})
+// This check runs on the whole form after individual fields are validated.
+.refine(data => data.status, {
+    message: "Status fehlt!",
+    path: ["status"], // Points the error message to the correct field.
+})
+.refine(data => data.priority, {
+    message: "Priorität fehlt!",
+    path: ["priority"],
+})
+.refine(data => data.label, {
+    message: "Label fehlt!",
+    path: ["label"],
+})
+.refine(data => data.dueDate !== null, {
+    message: "Fälligkeitsdatum fehlt!",
+    path: ["dueDate"],
 });
 
 export type taskFormData = z.infer<typeof taskFormSchema>;

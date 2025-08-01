@@ -33,7 +33,10 @@ const statuses: Status[] = [
 ];
 
 export default function TaskStatus() {
-  const { control } = useFormContext<taskFormData>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<taskFormData>();
   return (
     <div className="flex flex-col gap-2">
       <Label className="opacity-75 text-sm font-medium">Status</Label>
@@ -67,6 +70,9 @@ export default function TaskStatus() {
           );
         }}
       />
+      {errors.status && (
+        <p className="text-red-500 text-sm">{errors.status.message}</p>
+      )}
     </div>
   );
 }
